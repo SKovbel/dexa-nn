@@ -4,7 +4,8 @@
 class Main {
     static nnName = 'nn-self-car-drive'
     constructor() {
-        this.mutationAmount = 0.3;
+        this.carStartsY = 0;
+        this.mutationAmount = 0.2;
         this.mutationDelta = 0.03;
         this.maxIter = 1000;
         this.maxCars = 500;
@@ -16,6 +17,7 @@ class Main {
     }
 
     init() {
+        this.cars = [];
         this.iter = 0;
         this.generateField();
         this.generateCars();
@@ -23,11 +25,11 @@ class Main {
     }
 
     generateField() {
-        this.carCanvas = document.getElementById("carCanvas");
+        this.carCanvas = document.getElementById("car-canvas");
         this.carCtx = this.carCanvas.getContext("2d");
         this.carCanvas.width = 200;
         
-        this.networkCanvas = document.getElementById("networkCanvas");
+        this.networkCanvas = document.getElementById("network-canvas");
         this.networkCtx = this.networkCanvas.getContext("2d");
         this.networkCanvas.width = 500;
 
@@ -35,9 +37,8 @@ class Main {
     }
 
     generateCars() {
-        this.cars = [];
         for (let i = 0; i < this.maxCars; i++) {
-            this.cars.push(new Car(this.road.getLaneCenter(1), 100, 30, 50, "AI", 3));
+            this.cars.push(new Car(this.road.getLaneCenter(1), this.carStartsY, 30, 50, "AI", 3));
         }
         this.LoadNN();
         this.bestCar = this.cars[0];
@@ -83,7 +84,6 @@ class Main {
     }
     
     animate(time) {
-        this.iter++;
         for (let i = 0; i < this.traffics.length; i++) {
             this.traffics[i].update(this.road.borders, []);
         }
@@ -94,8 +94,8 @@ class Main {
     
         this.bestCar = this.fitness();
     
-        carCanvas.height = window.innerHeight;
-        networkCanvas.height = window.innerHeight;
+        this.carCanvas.height = window.innerHeight;
+        this.networkCanvas.height = window.innerHeight;
     
         this.carCtx.save();
         this.carCtx.translate(0, -this.bestCar.y + this.carCanvas.height * 0.7);
@@ -104,9 +104,12 @@ class Main {
         for (let i = 0; i < this.traffics.length; i++) {
             this.traffics[i].draw(this.carCtx, "brown");
         }
+
+        let cntUsefulCars = 0;
         this.carCtx.globalAlpha = 0.2;
         for (let i = 0; i < this.cars.length; i++) {
-            this.cars[i].draw(this.carCtx, "grey");
+            this.cars[i].draw(this.carCtx, "yellow");
+            cntUsefulCars += this.cars[i].damaged || this.cars[i].y < this.carStartsY || this.cars[i].friction > 0.05 ? 0 : 1;
         }
         this.carCtx.globalAlpha = 1;
     
@@ -114,11 +117,15 @@ class Main {
         this.carCtx.restore();
     
         this.networkCtx.lineDashOffset = time/50;
-        NeuralNetworkVisualizer.drawNetwork(this.networkCtx, this.bestCar.nn);
-    
-        if (this.iter % 50 == 0) console.log(this.iter);
-        if (this.iter > this.maxIter) {
-            this.saveNN();
+        NeuralNetworkVisualizer.drawNetwork(this.networkCtx, this.bestCar.nn, ["🠭", "🠬", "🠮", "🠯"]);
+
+        if (this.iter % 50 == 0) {
+            console.log(this.iter + '; ' + cntUsefulCars);
+        }
+        if (this.iter > this.maxIter || cntUsefulCars == 0) {
+            if (cntUsefulCars) {
+                this.saveNN();
+            }
             this.mutationAmount -= this.mutationDelta;
             console.log('Mutation K = ' + this.mutationAmount);
             this.init();
@@ -127,13 +134,9 @@ class Main {
         if (this.mutationAmount > 0) {
             requestAnimationFrame(this.animate.bind(this));
         }
-
+        this.iter++;
     }
 }
-
-// load
-
-
 
 const main = new Main();
 

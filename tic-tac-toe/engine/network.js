@@ -4,27 +4,32 @@ class NetworkEngine {
     constructor(mutation = 0) {
         this.code = 'network';
         this.mutation = mutation;
-        this.nn = new NeuralNetwork([10, 20, 9]);
+        this.nn = new NeuralNetwork([
+            {count: 10, activation: NeuralNetworkActivation.RELU},
+            {count: 36, activation: NeuralNetworkActivation.RELU},
+            {count: 36, activation: NeuralNetworkActivation.SIGMOID},
+            {count: 9}
+        ]);
         this.loadNN();
     }
 
-    move(fields, turn) {
-        const data = [ ...fields, turn];
+    move(game) {
+        const data = [ ...game.fields, game.who];
         const outputs = NeuralNetwork.feedforward(this.nn, data);
         for (let i = 0; i < outputs.length; i++) {
-            if (fields[i] != 0) {
+            if (game.fields[i] != 0) {
                 outputs[i] = 0;
             }
         }
         return outputs.findIndex(v=>v==Math.max(...outputs));
     }
 
-    loadNN() {
+    loadNN(i) {
         if (localStorage.getItem(NetworkEngine.nnName)) {
-            this.nn = JSON.parse(localStorage.getItem(NetworkEngine.nnName));
-            if (this.mutation > 0) {
-                NeuralNetwork.mutate(this.nn, this.mutation);
-            }
+            this.nn = NeuralNetwork.load(
+                JSON.parse(localStorage.getItem(NetworkEngine.nnName)), 
+                this.mutation
+            );
         }
     }
 

@@ -1,11 +1,11 @@
 class NeuralNetwork {
-    constructor(nnLayers) {
+    constructor(layersConfig) {
         this.layers = [];
-        for (let i = 0; i < nnLayers.length - 1; i++) {
+        for (let i = 0; i < layersConfig.length - 1; i++) {
             this.layers.push(new NeuralNetworkLayer(
-                nnLayers[i].count, 
-                nnLayers[i + 1].count,
-                nnLayers[i].activation, 
+                layersConfig[i].count, 
+                layersConfig[i + 1].count,
+                layersConfig[i].activation, 
             ));
         }
     }
@@ -15,7 +15,6 @@ class NeuralNetwork {
             inputs,
             network.layers[0]
         );
-
         for (let i = 1; i < network.layers.length; i++) {
             outputs = NeuralNetworkLayer.feedForward(
                 outputs,
@@ -28,7 +27,7 @@ class NeuralNetwork {
     static load(data, mutation = 0) {
         const network = data;
         for (let layer of network.layers) {
-            NeuralNetworkActivation.init(layer);
+            NeuralNetworkActivation.initActivationFunction(layer);
         }
         NeuralNetwork.mutate(network, mutation);
         return network;
@@ -53,29 +52,71 @@ class NeuralNetwork {
 
 class NeuralNetworkActivation {
     static RELU = 'relu';
-    static SIGMOID = 'sigmoid';
     static TANH = 'tanh';
+    static SIGMOID = 'sigmoid';
+    static SOFTMAX = 'softmax';
 
-    static init(layer) {
-        if (layer.activation == this.SIGMOID) {
-            layer.activationCallback = this.sigmoid;
-        } else if (layer.activation == this.TANH) {
-            layer.activationCallback = this.tanh;
-        } else {
-            layer.activationCallback = this.relu;
+    static initActivationFunction(layer) {
+        switch (layer.activation) {
+            case this.RELU:
+                layer.activationFunction = this.relu;
+                break;
+            case this.TANH:
+                layer.activationFunction = this.tanh;
+                break;
+            case this.SIGMOID:
+                layer.activationFunction = this.sigmoid;
+                break;
+            case this.SOFTMAX:
+                layer.activationFunction = this.softmax;
+                break;
         }
     }
 
-    static tanh(sum) {
-        return Math.tanh(sum);
+    static tanh(layer) {
+        for (let i = 0; i < layer.outputs.length; i++) {
+            let x = layer.biases[i];
+            for (let j = 0; j < layer.inputs.length; j++) {
+                x += layer.inputs[j] * layer.weights[j][i];
+            }
+            layer.outputs[i] = Math.tanh(x);
+        }
     }
 
-    static relu(sum) {
-        return sum > 0 ? 1 : 0;
+    static sigmoid(layer) {
+        for (let i = 0; i < layer.outputs.length; i++) {
+            let x = layer.biases[i];
+            for (let j = 0; j < layer.inputs.length; j++) {
+                x += layer.inputs[j] * layer.weights[j][i];
+            }
+            layer.outputs[i] = 1 / (1 + Math.exp(-x));
+        }
     }
 
-    static sigmoid(sum) {
-        return 1 / (1 + Math.pow(Math.E, -sum));
+    static relu(layer) {
+        for (let i = 0; i < layer.outputs.length; i++) {
+            let x = layer.biases[i];
+            for (let j = 0; j < layer.inputs.length; j++) {
+                x += layer.inputs[j] * layer.weights[j][i];
+            }
+            layer.outputs[i] = x > 0 ? 1 : 0;
+        }
+    }
+
+    static softmax(layer) {
+        let sum = 0;
+        let exp = [];
+        for (let i = 0; i < layer.outputs.length; i++) {
+            let x = layer.biases[i];
+            for (let j = 0; j < layer.inputs.length; j++) {
+                x += layer.inputs[j] * layer.weights[j][i];
+            }
+            exp[i] = Math.exp(x);
+            sum += exp[i];
+        }
+        for (let i = 0; i < layer.outputs.length; i++) {
+            layer.outputs[i] = exp[i] / sum;
+        }
     }
 }
 
@@ -91,7 +132,7 @@ class NeuralNetworkLayer {
             this.weights[i] = new Array(outputCount);
         }
 
-        NeuralNetworkActivation.init(this);
+        NeuralNetworkActivation.initActivationFunction(this); // set callback of activation function
         NeuralNetworkLayer.#randomize(this);
     }
 
@@ -107,19 +148,15 @@ class NeuralNetworkLayer {
         }
     }
 
-    static feedForward(givenInputs, layer) {
+    static feedForward(inputs, layer) {
         for (let i = 0; i < layer.inputs.length; i++) {
-            layer.inputs[i] = givenInputs[i];
+            layer.inputs[i] = inputs[i];
         }
-
-        for (let i = 0; i < layer.outputs.length; i++) {
-            let sum = layer.biases[i];
-            for (let j = 0; j < layer.inputs.length; j++) {
-                sum += layer.inputs[j] * layer.weights[j][i];
-            }
-            layer.outputs[i] = layer.activationCallback(sum);
-        }
-
+        layer.activationFunction(layer);
         return layer.outputs;
+    }
+
+    static BackPropagation(outputs, layer) {
+
     }
 }

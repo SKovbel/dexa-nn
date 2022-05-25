@@ -18,11 +18,11 @@ class Minimax {
 
         let bestScore = turn > 0 ? -Infinity : Infinity;
         let bestFields = []
-        for (let i; i < fields.length; i++) {
-
+        for (let i = 0; i < fields.length; i++) {
             if (fields[i] != 0) { // skip 1 and -1
                 continue;
             }
+
             fields[i] = turn;
             const score = Minimax.minimax(fields, -turn, depth + 1, maxDepth, callbackResult);
             if (turn > 0 && score >= bestScore) {

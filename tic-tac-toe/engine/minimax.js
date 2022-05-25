@@ -4,8 +4,8 @@ class MinimaxEngine {
         this.maxDepth = maxDepth;
     }
 
-    move(fields, turn) {
-        const bestFields = Minimax.minimax(fields, turn, 0, this.maxDepth, Game.gameStatus)
+    move(game) {
+        const bestFields = Minimax.minimax(game.fields, game.who, 0, this.maxDepth, Game.gameStatus)
         return bestFields[Math.floor(Math.random() * bestFields.length)];
     }
 }

@@ -23,15 +23,15 @@ class Game {
     }
 
     move() {
-        const best = this.who > 0 
-            ? this.engineX.move(this.fields, this.who)
-            : this.engineO.move(this.fields, this.who);
-
-        this.fields[best] = this.who;
-
-        this.who = -this.who;
-        this.undo[best] = this.fields.filter(v => v !== 0).length;
-        this.status = Game.gameStatus(this.fields);
+        if (this.status === null) {
+            const best = this.who > 0 ? this.engineX.move(this) : this.engineO.move(this);
+            this.fields[best] = this.who;
+            //console.log(best + ': ' +this.who);
+            this.who = -this.who;
+            this.undo[best] = this.fields.filter(v => v !== 0).length;
+            this.status = Game.gameStatus(this.fields);
+        }
+        return this.status;
     }
 
     /**
@@ -41,21 +41,13 @@ class Game {
      * null - game is not finished
      */
     static gameStatus(fields = []) {
-        let zeroCount = fields.filter(v => v == 0).length;
-
-        // make last move of current player
-        if (zeroCount == 1) {
-            //zeroCount--;
-            //fields = fields.map(v => v === 0 ? this.who : v);
-        };
-
         let isDraw = true;
         for (const line of Game.lines) {
             const absSum = Math.abs(fields[line[0]] + fields[line[1]] + fields[line[2]]);
             if (absSum == 3) {
                 return fields[line[0]]; // win
             }
-            if (isDraw && zeroCount) { // if zeroCount is 0 then we check wins only, game is end
+            if (isDraw) {
                 const sumAbs = Math.abs(fields[line[0]]) + Math.abs(fields[line[1]]) + Math.abs(fields[line[2]]);
                 if (absSum == sumAbs) {
                     isDraw = false;

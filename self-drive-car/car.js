@@ -8,27 +8,28 @@ class Car {
         this.width = width;
         this.height = height;
         this.maxSpeed = maxSpeed;
+        this.rayCount = 5;
         this.friction = 0.05;
         this.acceleration = 0.2;
         this.useNN = controlType == "AI";
 
         this.controls = new Controls(controlType);
         if (controlType != "DUMMY") {
-            this.sensor = new Sensor(this);
+            this.sensor = new Sensor(this, this.rayCount);
             this.nn = new NeuralNetwork([
-                {count: this.sensor.rayCount, activation: NeuralNetworkActivation.SIGMOID},
-                {count: 6, activation: NeuralNetworkActivation.TANH},
+                {count: this.rayCount, activation: NeuralNetworkActivation.RELU},
                 {count: 6, activation: NeuralNetworkActivation.RELU},
                 {count: 4}
             ]);
-            this.nn = new NeuralNetwork([
-                {count: this.sensor.rayCount, activation: NeuralNetworkActivation.RELU},
+            /*this.nn = new NeuralNetwork([
+                {count: this.rayCount, activation: NeuralNetworkActivation.TANH},
+                {count: this.rayCount, activation: NeuralNetworkActivation.SOFTMAX},
+                {count: this.rayCount, activation: NeuralNetworkActivation.SIGMOID},
                 {count: 6, activation: NeuralNetworkActivation.RELU},
                 {count: 4}
-            ]);
+            ]);*/
         }
     }
-
     update(roadBorders, traffics) {
         if (!this.damaged) {
             this.#move();
@@ -38,12 +39,11 @@ class Car {
                 this.sensor.update(roadBorders, traffics);
                 const offsets = this.sensor.readings.map(s => s == null ? 0 : 1 - s.offset);
                 const outputs = NeuralNetwork.feedforward(this.nn, offsets);
-
                 if (this.useNN) {
-                        this.controls.forward = outputs[0];
-                        this.controls.left = outputs[1];
-                        this.controls.right = outputs[2];
-                        this.controls.re = outputs[3];
+                    this.controls.forward = outputs[0];
+                    this.controls.left = outputs[1];
+                    this.controls.right = outputs[2];
+                    this.controls.re = outputs[3];
                 }
             }
         }
@@ -122,11 +122,7 @@ class Car {
     }
 
     draw(ctx, color, showSensors = false) {
-        if (this.damaged) {
-            ctx.fillStyle = "grey";
-        } else {
-            ctx.fillStyle = color;
-        }
+        ctx.fillStyle = this.damaged ? 'grey' : color;
         ctx.beginPath();
         ctx.moveTo(this.polygon[0].x, this.polygon[0].y);
         for (let i = 1; i < this.polygon.length; i++) {
