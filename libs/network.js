@@ -11,17 +11,15 @@ class NeuralNetwork {
     }
 
     static feedforward(network, inputs) {
-        let outputs = NeuralNetworkLayer.feedForward(
-            inputs,
-            network.layers[0]
-        );
+        let outputs = NeuralNetworkLayer.feedForward(inputs, network.layers[0]);
         for (let i = 1; i < network.layers.length; i++) {
-            outputs = NeuralNetworkLayer.feedForward(
-                outputs,
-                network.layers[i]
-            );
+            outputs = NeuralNetworkLayer.feedForward(outputs, network.layers[i]);
         }
         return outputs;
+    }
+
+    static backPropagation(outputs, layer) {
+
     }
 
     static load(data, mutation = 0) {
@@ -37,14 +35,13 @@ class NeuralNetwork {
         if (mutation  == 0) {
             return;
         }
-        for (let layer of network.layers) {
-            for (let i = 0; i < layer.biases.length; i++) {
-                layer.biases[i] = lerp(layer.biases[i], 2*Math.random() - 1, mutation);
-            }
-            for (let i = 0; i < layer.weights.length; i++) {
-                for (let j = 0; j < layer.weights[i].length; j++) {
+        for (let l = 0; l < network.layers.length; l++) {
+            const layer = network.layers[l];
+            for (let j = 0; j < layer.outputs.length; j++) {
+                for (let i = 0; i < layer.inputs.length; i++) {
                     layer.weights[i][j] = lerp(layer.weights[i][j], 2*Math.random() - 1, mutation);
                 }
+                layer.biases[j] = lerp(layer.biases[j], 2*Math.random() - 1, mutation);
             }
         }
     }
@@ -122,29 +119,27 @@ class NeuralNetworkActivation {
 
 class NeuralNetworkLayer {
     constructor(inputCount, outputCount, activation = NeuralNetworkActivation.RELU) {
-        this.biases = new Array(outputCount);
-        this.inputs = new Array(inputCount);
-        this.outputs = new Array(outputCount);
-        this.weights = new Array(inputCount);
         this.activation = activation;
+
+        this.inputs = new Array(inputCount);
+        this.biases = new Array(outputCount);
+        this.weights = new Array(inputCount);
+        this.outputs = new Array(outputCount);
 
         for (let i = 0; i < inputCount; i++) {
             this.weights[i] = new Array(outputCount);
         }
 
-        NeuralNetworkActivation.initActivationFunction(this); // set callback of activation function
         NeuralNetworkLayer.#randomize(this);
+        NeuralNetworkActivation.initActivationFunction(this); // set callback of activation function
     }
 
     static #randomize(layer) {
-         for (let i = 0; i < layer.inputs.length; i++) {
-            for (let j = 0; j < layer.outputs.length; j++) {
+        for (let j = 0; j < layer.outputs.length; j++) {
+            for (let i = 0; i < layer.inputs.length; i++) {
                 layer.weights[i][j] = Math.random() * 2 - 1;
             }
-        }
-
-        for (let i = 0; i < layer.biases.length; i++) {
-            layer.biases[i] = Math.random() * 2 - 1;
+            layer.biases[j] = Math.random() * 2 - 1;
         }
     }
 
@@ -156,7 +151,7 @@ class NeuralNetworkLayer {
         return layer.outputs;
     }
 
-    static BackPropagation(outputs, layer) {
+    static backPropagation(outputs, layer) {
 
     }
 }
