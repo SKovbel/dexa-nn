@@ -1,0 +1,17 @@
+#content {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+#board-canvas {
+    border: 1px solid red;
+}
+
+#network-canvas {
+    width: 50%;
+    height: 100vh;
+    border: 1px solid blue;
+}

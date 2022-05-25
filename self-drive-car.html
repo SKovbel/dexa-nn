@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<head>
+    <title>Self Driving Car</title>
+    <link rel="stylesheet" href="styles/self-drive-car.css">
+</head>
+<body>
+    <div id="content">
+        <canvas id="carCanvas"></canvas>
+        <div id="verticalButtons">
+            <button onclick="save()">💾</button>
+            <button onclick="discard()">📄</button>
+        </div>
+        <canvas id="networkCanvas"></canvas>
+    </div>
+
+    <script src="libs/math-utils.js"></script>
+    <script src="libs/network.js"></script>
+    <script src="libs/network-visualizer.js"></script>
+    <script src="self-drive-car/canvas.js"></script>
+    <script src="self-drive-car/sensor.js"></script>
+    <script src="self-drive-car/controls.js"></script>
+    <script src="self-drive-car/utils.js"></script>
+    <script src="self-drive-car/road.js"></script>
+    <script src="self-drive-car/car.js"></script>
+    <script src="self-drive-car/train.js"></script>
+    <script src="self-drive-car/main.js"></script>
+</body>
