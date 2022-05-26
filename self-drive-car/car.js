@@ -12,7 +12,7 @@ class Car {
         this.friction = 0.05;
         this.acceleration = 0.2;
         this.useNN = controlType == "AI";
-
+        this.controlType = controlType;
         this.controls = new Controls(controlType);
         if (controlType != "DUMMY") {
             this.sensor = new Sensor(this, this.rayCount);
@@ -21,15 +21,9 @@ class Car {
                 {count: 6, activation: NeuralNetworkActivation.RELU},
                 {count: 4}
             ]);
-            /*this.nn = new NeuralNetwork([
-                {count: this.rayCount, activation: NeuralNetworkActivation.TANH},
-                {count: this.rayCount, activation: NeuralNetworkActivation.SOFTMAX},
-                {count: this.rayCount, activation: NeuralNetworkActivation.SIGMOID},
-                {count: 6, activation: NeuralNetworkActivation.RELU},
-                {count: 4}
-            ]);*/
         }
     }
+
     update(roadBorders, traffics) {
         if (!this.damaged) {
             this.#move();

@@ -61,16 +61,15 @@ class Main {
 
     saveNN() {
         console.log('Saved');
-        localStorage.setItem(Main.nnName, JSON.stringify(this.bestCar.nn));
+        const jsonData = NeuralNetworkTools.export(this.bestCar.nn);
+        localStorage.setItem(Main.nnName, jsonData);
     }
 
     LoadNN() {
-        if (localStorage.getItem(Main.nnName)) {
+        const data = localStorage.getItem(Main.nnName);
+        if (data) {
             for (let i = 0; i < this.cars.length; i++) {
-                this.cars[i].nn = NeuralNetwork.load(
-                    JSON.parse(localStorage.getItem(Main.nnName)), 
-                    i == 0 ? 0 : this.mutationAmount
-                );
+                this.cars[i].nn = NeuralNetworkTools.import(data, i == 0 ? 0 : this.mutationAmount);
             }
         }
     }
