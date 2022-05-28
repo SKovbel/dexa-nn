@@ -7,16 +7,6 @@ class NeuralNetwork {
                 layersConfig[l + 1].count,
                 layersConfig[l].activation
             ));
-            NeuralNetwork.#randomize(this.layers[l]);
-        }
-    }
-
-    static #randomize(layer) {
-        for (let j = 0; j < layer.biases.length; j++) {
-            for (let i = 0; i < layer.weights.length; i++) {
-                layer.weights[i][j] = Math.random() * 2 - 1;
-            }
-            layer.biases[j] = Math.random() * 2 - 1;
         }
     }
 
@@ -34,31 +24,29 @@ class NeuralNetwork {
 
 class NeuralNetworkLayer {
     constructor(inputCount, outputCount, activation = NeuralNetworkActivation.RELU) {
-        this.biases = new Array(outputCount);
-        this.weights = Array.from(Array(inputCount), () => new Array(outputCount))
         this.activation = activation;
+        this.biases = new Array(outputCount);
+        this.weights = new Array(inputCount);
+        for (let j = 0; j < inputCount; j++) {
+            this.weights[j] = new Array(outputCount);
+        }
         NeuralNetworkLayer.init(this);
+        NeuralNetworkLayer.#randomize(this);
     }
 
+    // public init, used in load
     static init(layer) {
         layer.inputs = new Array(layer.weights.length);
         layer.outputs = new Array(layer.biases.length);
+        NeuralNetworkActivation.init(layer);
+    }
 
-        switch (layer.activation) {
-            case NeuralNetworkActivation.RELU:
-                layer.activationFunction = NeuralNetworkActivation.relu;
-                layer.dereviateFunction = NeuralNetworkActivation.drelu;
-                break;
-            case NeuralNetworkActivation.TANH:
-                layer.activationFunction = NeuralNetworkActivation.tanh;
-                break;
-            case NeuralNetworkActivation.SIGMOID:
-                layer.activationFunction = NeuralNetworkActivation.sigmoid;
-                layer.dereviateFunction = NeuralNetworkActivation.dsigmoid;
-                break;
-            case NeuralNetworkActivation.SOFTMAX:
-                layer.activationFunction = NeuralNetworkActivation.softmax;
-                break;
+    static #randomize(layer) {
+        for (let j = 0; j < layer.biases.length; j++) {
+            for (let i = 0; i < layer.weights.length; i++) {
+                layer.weights[i][j] = Math.random() * 2 - 1;
+            }
+            layer.biases[j] = Math.random() * 2 - 1;
         }
     }
 }
@@ -69,6 +57,25 @@ class NeuralNetworkActivation {
     static TANH = 'tanh';
     static SIGMOID = 'sigmoid';
     static SOFTMAX = 'softmax';
+
+    static init(layer) {
+        switch (layer.activation) {
+            case NeuralNetworkActivation.RELU:
+                layer.activationFunction = NeuralNetworkActivation.relu;
+                layer.derivateFunction = NeuralNetworkActivation.drelu;
+                break;
+            case NeuralNetworkActivation.TANH:
+                layer.activationFunction = NeuralNetworkActivation.tanh;
+                break;
+            case NeuralNetworkActivation.SIGMOID:
+                layer.activationFunction = NeuralNetworkActivation.sigmoid;
+                layer.derivateFunction = NeuralNetworkActivation.dsigmoid;
+                break;
+            case NeuralNetworkActivation.SOFTMAX:
+                layer.activationFunction = NeuralNetworkActivation.softmax;
+                break;
+        }
+    }
 
     static tanh() {
         for (let i = 0; i < this.outputs.length; i++) {
@@ -114,13 +121,5 @@ class NeuralNetworkActivation {
         for (let i = 0; i < this.outputs.length; i++) {
             this.outputs[i] = exp[i] / sum;
         }
-    }
-
-    static drelu(x) {
-        return x > 0 ? 1 : 0.001 * x;
-    }
-
-    static dsigmoid(x) {
-        return x * (1 - x);
     }
 }
