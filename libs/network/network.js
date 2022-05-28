@@ -3,8 +3,8 @@ class NeuralNetwork {
         this.layers = [];
         for (let l = 0; l < layersConfig.length - 1; l++) {
             this.layers.push(new NeuralNetworkLayer(
-                layersConfig[l].count, 
-                layersConfig[l + 1].count,
+                layersConfig[l].size, 
+                layersConfig[l + 1].size,
                 layersConfig[l].activation
             ));
         }

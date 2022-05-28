@@ -17,9 +17,9 @@ class Car {
         if (controlType != "DUMMY") {
             this.sensor = new Sensor(this, this.rayCount);
             this.nn = new NeuralNetwork([
-                {count: this.rayCount, activation: NeuralNetworkActivation.RELU},
-                {count: 6, activation: NeuralNetworkActivation.RELU},
-                {count: 4}
+                {size: this.rayCount, activation: NeuralNetworkActivation.RELU},
+                {size: 6, activation: NeuralNetworkActivation.RELU},
+                {size: 4}
             ]);
         }
     }

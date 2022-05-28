@@ -17,9 +17,9 @@ class Main {
     ];
     start1() {
         const nn = new NeuralNetwork([
-            {count: 2, activation: NeuralNetworkActivation.SIGMOID},
-            {count: 3, activation: NeuralNetworkActivation.SIGMOID},
-            {count: 1},
+            {size: 2, activation: NeuralNetworkActivation.SIGMOID},
+            {size: 3, activation: NeuralNetworkActivation.SIGMOID},
+            {size: 1},
         ]);
         const e = NeuralNetworkBackPropagation.train(nn, this.train1, 0.01, 0.0001, 100000);
         console.log('Epoch: ' + e);
@@ -29,11 +29,12 @@ class Main {
     }
 
     start2() {
-        const nn = new NeuralNetwork([
-            {count: 3, activation: NeuralNetworkActivation.SIGMOID},
-            {count: 3, activation: NeuralNetworkActivation.SIGMOID},
-            {count: 3, activation: NeuralNetworkActivation.TANH},
-            {count: 1},
+        const network = new NeuralNetwork([
+            {size: 3, activation: NeuralNetworkActivation.RELU},
+            {size: 3, activation: NeuralNetworkActivation.TANH},
+            {size: 3, activation: NeuralNetworkActivation.SOFTMAX},
+            {size: 3, activation: NeuralNetworkActivation.SIGMOID},
+            {size: 1},
         ]);
 
         // prepare train
@@ -44,11 +45,11 @@ class Main {
         }
 
         // train
-        NeuralNetworkBackPropagation.train(nn, newTrain, 0.1, 0.000001, 1000000);
+        NeuralNetworkBackPropagation.train(network, NeuralNetworkBackPropagation.SGD, newTrain, 0.01, 0.000001, 1000000);
 
         // check
         for (let t = 0; t < this.train2.length; t++) {
-            console.log(NeuralNetwork.feedforward(nn, this.train2[t].inputs));
+            console.log(NeuralNetwork.feedforward(network, this.train2[t].inputs));
         }
     }
 }

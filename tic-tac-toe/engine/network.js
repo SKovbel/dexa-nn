@@ -5,10 +5,10 @@ class NetworkEngine {
         this.code = 'network';
         this.mutation = mutation;
         this.nn = new NeuralNetwork([
-            {count: 10, activation: NeuralNetworkActivation.RELU},
-            {count: 36, activation: NeuralNetworkActivation.RELU},
-            {count: 36, activation: NeuralNetworkActivation.SIGMOID},
-            {count: 9}
+            {size: 10, activation: NeuralNetworkActivation.RELU},
+            {size: 36, activation: NeuralNetworkActivation.RELU},
+            {size: 36, activation: NeuralNetworkActivation.SIGMOID},
+            {size: 9}
         ]);
         this.loadNN();
     }
