@@ -3,11 +3,13 @@
     <title>XOR</title>
     <link rel="stylesheet" href="styles/xor.css">
     <script src="libs/network/network.js"></script>
-    <script src="libs/network/back-propagation.js"></script>
+    <script src="libs/network/backpropagation.js"></script>
+    <script src="libs/network/visualizer.js"></script>
     <script src="xor/main.js"></script>
 </head>
 <body>
     <pre id="content"></pre>
+    <canvas id="network-canvas"></canvas>
     <button id="restart" onclick="restart();">Restart</button>
     <script>
         function restart() {
@@ -21,6 +23,7 @@
             button.disabled = true;
             nn.train();
             nn.test();
+            nn.animate();
             button.disabled = false;
         }
         restart();

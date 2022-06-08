@@ -48,10 +48,19 @@ class Main {
                 out += this.trains[t].outputs[i] + ' ';
             }
             const msg = document.createElement('p');
-            msg.innerText = '(' + (this.trains[t].train ? 'train' : 'skip ') + ') ' + 
+            msg.innerText = '(' + (this.trains[t].train ? 'train' : 'skip!') + ') ' + 
                 parseFloat(result).toFixed(4) + '   [ ' + ins + '] => [ ' + out + ']';
             msg.style.color = Math.round(result) == this.trains[t].outputs[0] ? 'green' : 'red';
             this.contentElement.append(msg);
         }
     }
+
+    animate(time) {
+        this.networkCtx = this.networkCanvas.getContext('2d');
+        this.networkCanvas.height = window.innerHeight;
+        this.networkCanvas.width = 500;
+        NeuralNetworkVisualizer.drawNetwork(this.networkCtx, this.network, []);
+        //requestAnimationFrame(this.animate.bind(this));
+    }
 }
+
