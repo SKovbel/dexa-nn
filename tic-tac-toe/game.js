@@ -19,19 +19,18 @@ class Game {
         this.who = 1;
         this.undo = new Array(9).fill(0);
         this.fields = new Array(9).fill(0);
+        this.lastMove = null;
         this.status = null;
     }
 
     move() {
         if (this.status === null) {
-            const best = this.who > 0 ? this.engineX.move(this) : this.engineO.move(this);
-            this.fields[best] = this.who;
-            //console.log(best + ': ' +this.who);
+            this.lastMove = this.who > 0 ? this.engineX.move(this) : this.engineO.move(this);
+            this.fields[this.lastMove] = this.who;
             this.who = -this.who;
-            this.undo[best] = this.fields.filter(v => v !== 0).length;
+            this.undo[this.lastMove] = this.fields.filter(v => v !== 0).length;
             this.status = Game.gameStatus(this.fields);
         }
-        return this.status;
     }
 
     /**

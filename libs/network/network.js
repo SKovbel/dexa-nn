@@ -77,7 +77,7 @@ class NeuralNetworkActivation {
         }
     }
 
-    static tanh() {
+    static tanh() { // -1..1
         for (let i = 0; i < this.outputs.length; i++) {
             let x = this.biases[i];
             for (let j = 0; j < this.inputs.length; j++) {
@@ -87,7 +87,7 @@ class NeuralNetworkActivation {
         }
     }
 
-    static sigmoid() {
+    static sigmoid() { // 0..1
         for (let i = 0; i < this.outputs.length; i++) {
             let x = this.biases[i];
             for (let j = 0; j < this.inputs.length; j++) {
@@ -97,7 +97,7 @@ class NeuralNetworkActivation {
         }
     }
 
-    static relu() {
+    static relu() { // 0..1
         for (let i = 0; i < this.outputs.length; i++) {
             let x = this.biases[i];
             for (let j = 0; j < this.inputs.length; j++) {
@@ -107,7 +107,7 @@ class NeuralNetworkActivation {
         }
     }
 
-    static softmax() {
+    static softmax() { // 0..1, sum(all) = 1
         let sum = 0;
         let exp = [];
         for (let i = 0; i < this.outputs.length; i++) {

@@ -1,86 +1,93 @@
 class Main {
     constructor(boardCanvas, networkCanvas) {
-        this.bestWins = -Infinity;
-        this.bestLosts = Infinity;
         this.maxGames = 1000;
-        this.iteration = 0;
-        this.maxIteration = Infinity;
-        this.resetIteration = 400;
-        this.boardCanvas = boardCanvas;
-        this.boardCanvas.width = 400;
-        this.boardCanvas.height = 400;
-        this.boardCtx = this.boardCanvas.getContext('2d');
 
         this.networkCanvas = networkCanvas;
         this.networkCtx = this.networkCanvas.getContext('2d');
         this.networkCanvas.width = 500;
 
+        this.maxIteration = 100;
+        this.batchTrains = [];
         this.board = new Board(this.boardCtx);
-        this.games = [];
-        this.#train();
+        this.#restartGame();
     }
 
-    #train() {
-        this.games = [];
+    #restartGame() {
+        this.trains = [];
+        this.maxGames--;
+        let depth = 10 * Math.random();
+        depth = 1;
 
-        const depth = 4;
-        const mutation = 0.5;
-        for (let i = 0; i < this.maxGames / 2; i++) {
-            this.games.push(new Game(
+        if (Math.random() > 0.5) {
+            this.game = new Game(
                 new MinimaxEngine(depth),
-                new NetworkEngine(i == 0 ? 0 : mutation)
-            ));
-            this.games.push(new Game(
-                new NetworkEngine(i == 0 ? 0 : mutation),
+                new NetworkEngine()
+            );
+        } else {
+            this.game = new Game(
+                new NetworkEngine(),
                 new MinimaxEngine(depth)
-            ));
+            );
         }
     }
 
-    #fitness() {
-        return this.games.find(c=>c.wins==Math.max(...this.games.map(g=>g.wins)));
+    #playGame() {
+        if (this.game.status === null) { // move
+            const data = {inputs: [ ...this.game.fields, this.game.who], outputs: [0,0,0, 0,0,0, 0,0,0]};
+            this.game.move();
+            data.outputs[this.game.lastMove] = 1;
+            this.trains.push(data);
+            return; // avoid game restarts
+        }
+        
+        if (this.status == 0) { // draw
+            console.log('draw');
+
+        } else { // won
+            const nnEngine = this.game.engineX.code == 'network' ? this.game.engineX : this.game.engineO;
+            const nnWin = (this.status > 0 && this.game.engineX.code == 'network') || (this.status < 0 && this.game.engineO.code == 'network');
+            if (nnWin) {
+                console.log('Network won');
+            } else {
+                console.log('MiniMax won');
+            }
+            for (let i = 0; i < this.trains.length; i++) {
+                const who = i % 2 == 0 ? 1 : -1;
+                if (who == this.game.status) {
+                    this.batchTrains.push(this.trains[i])
+                };
+            }
+            if (this.batchTrains.length > this.maxIteration) {
+                const maxError = 0.1;
+                const totalError = NeuralNetworkBackPropagation.train(nnEngine.nn, NeuralNetworkBackPropagation.SGD, this.batchTrains, 0.01, 0.1, 100000);
+                //if (totalError <= maxError) {
+                    this.maxIteration += 3;
+                    console.log('saveNN, error=' + totalError);
+                    nnEngine.saveNN();
+                //} else {
+                //    console.log('error=' + totalError);
+                //}
+                this.batchTrains = [];
+            }
+        }
+
+        this.#restartGame();
+    }
+
+    train() {
+        this.#playGame();
+        if (this.maxGames) {
+            this.train();
+        }
     }
 
     animate(time) {
-        for (let i = 0; i < this.games.length; i++) {
-            const game = this.games[i];
-            const status = game.move();
-            if (status === null) {
-                continue;
-            }
-            if ((status > 0 && game.engineX.code == 'network') || (status < 0 && game.engineO.code == 'network')) {
-                game.wins++;
-            } else if (status == 0) {
-                game.draws++;
-            } else {
-                game.losts++;
-            }
-            game.restart();
-        }
-
-        const bestGame = this.#fitness();
-        this.board.draw(bestGame);
-
+        const nnEngine = this.game.engineX.code == 'network' ? this.game.engineX : this.game.engineO;
         this.networkCanvas.height = window.innerHeight;
-        const nn = bestGame.engineX.code == 'network' ? bestGame.engineX.nn : bestGame.engineO.nn;
-        //NeuralNetworkVisualizer.drawNetwork(this.networkCtx, nn, []);
+        NeuralNetworkVisualizer.drawNetwork(this.networkCtx, nnEngine.nn, []);
 
-        this.iteration++;
-        if (this.maxIteration > 0 && (this.iteration % this.resetIteration == 0)) {
-            console.log('wins: ' + bestGame.wins + '; losts: ' + bestGame.losts + '; draw: ' + bestGame.draws + '; best wins = ' + this.bestWins + '; best losts = ' + this.bestLosts);
-            if (bestGame.wins >= this.bestWins) {
-                this.bestWins = bestGame.wins;
-                bestGame.engineX.code == 'network' ? bestGame.engineX.saveNN() : bestGame.engineO.saveNN();
-            }
-            if (bestGame.losts <= this.bestLosts) {
-                this.bestLosts = bestGame.losts;
-                bestGame.engineX.code == 'network' ? bestGame.engineX.saveNN() : bestGame.engineO.saveNN();
-            }
-            this.#train();
-        }
-        if (this.iteration < this.maxIteration) {
-            requestAnimationFrame(this.animate.bind(this));
-        }
+        //this.#playGame();
+        requestAnimationFrame(this.animate.bind(this));
     }
 }
 
@@ -93,7 +100,8 @@ const main = new Main(
     document.getElementById('board-canvas'),
     document.getElementById('network-canvas')
 );
-main.animate();
+//main.animate();
+main.train();
 
 
 function save() {

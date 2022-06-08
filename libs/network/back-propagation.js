@@ -10,13 +10,15 @@ class NeuralNetworkBackPropagation {
 
     static train(network, algorithm, trains, rate = 0.01, error = 0.1, epoch = 1000) {
         NeuralNetworkBackPropagation.init(network);
+        let totalError  = 0;
 
         const t0 = performance.now();
         if (algorithm == NeuralNetworkBackPropagation.SGD) {
-            NeuralNetworkBackPropagationSGD.train(network, trains, rate, error, epoch);
+            totalError = NeuralNetworkBackPropagationSGD.train(network, trains, rate, error, epoch);
         }
         const t1 = performance.now();
-        console.log('Time: ' + (Math.round((t1 - t0), 2) / 1000) + 's');
+        //console.log('Time: ' + (Math.round((t1 - t0), 2) / 1000) + 's Error=' + totalError);
+        return totalError;
     }
 }
 
@@ -32,8 +34,8 @@ class NeuralNetworkBackPropagationSGD {
             }
             e++;
         } while (totalError > error && e < epoch)
-        console.log('Epoch: ' + e + '; ' + 'Error: ' + totalError + '; ');
-        return [e, totalError];
+        //console.log('Epoch: ' + e + '; ' + 'Error: ' + totalError + '; ');
+        return totalError;
     }
 
     static backpPropagation(network, outputs, rate) {
