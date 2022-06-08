@@ -2,7 +2,18 @@
 <head>
     <title>Self Driving Car</title>
     <link rel="stylesheet" href="styles/self-drive-car.css">
+    <script src="libs/math-utils.js"></script>
+    <script src="libs/network/network.js"></script>
+    <script src="libs/network/util.js"></script>
+    <script src="libs/network/visualizer.js"></script>
+    <script src="self-drive-car/canvas.js"></script>
+    <script src="self-drive-car/sensor.js"></script>
+    <script src="self-drive-car/controls.js"></script>
+    <script src="self-drive-car/road.js"></script>
+    <script src="self-drive-car/car.js"></script>
+    <script src="self-drive-car/main.js"></script>
 </head>
+
 <body>
     <div id="content">
         <canvas id="car-canvas"></canvas>
@@ -13,16 +24,15 @@
         <canvas id="network-canvas"></canvas>
     </div>
 
-    <script src="libs/math-utils.js"></script>
-    <script src="libs/network/network.js"></script>
-    <script src="libs/network/util.js"></script>
-    <script src="libs/network/visualizer.js"></script>
-    <script src="self-drive-car/canvas.js"></script>
-    <script src="self-drive-car/sensor.js"></script>
-    <script src="self-drive-car/controls.js"></script>
-    <script src="self-drive-car/utils.js"></script>
-    <script src="self-drive-car/road.js"></script>
-    <script src="self-drive-car/car.js"></script>
-    <script src="self-drive-car/train.js"></script>
-    <script src="self-drive-car/main.js"></script>
+    <script>
+        const main = new Main();
+        function save() {
+            main.saveNN();
+        }
+        function discard() {
+            main.discardNN();
+        }
+        main.init();
+        main.animate();
+    </script>
 </body>

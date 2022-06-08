@@ -137,15 +137,3 @@ class Main {
     }
 }
 
-const main = new Main();
-
-function save() {
-    main.saveNN();
-}
-
-function discard() {
-    main.discardNN();
-}
-
-main.init();
-main.animate();

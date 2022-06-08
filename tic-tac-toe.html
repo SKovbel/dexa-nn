@@ -2,20 +2,6 @@
 <head>
     <title>Tic Tac Toe</title>
     <link rel="stylesheet" href="styles/tic-tac-toe.css">
-</head>
-<body>
-    <div id="info">
-        
-    </div>
-    <div id="content">
-        <canvas id="board-canvas"></canvas>
-        <div id="verticalButtons">
-            <button onclick="save()">💾</button>
-            <button onclick="discard()">📄</button>
-        </div>
-        <canvas id="network-canvas"></canvas>
-    </div>
-
     <script src="libs/math-utils.js"></script>
     <script src="libs/http-utils.js"></script>
     <script src="libs/minimax.js"></script>
@@ -29,4 +15,41 @@
     <script src="tic-tac-toe/engine/minimax.js"></script>
     <script src="tic-tac-toe/engine/network.js"></script>
     <script src="tic-tac-toe/main.js"></script>
+</head>
+
+<body>
+    <div id="info">
+        
+    </div>
+    <div id="content">
+        <canvas id="board-canvas"></canvas>
+        <div id="verticalButtons">
+            <button onclick="save()">💾</button>
+            <button onclick="discard()">📄</button>
+        </div>
+        <canvas id="network-canvas"></canvas>
+    </div>
+
+    <script>
+        if (getGetParam('test')) {
+            const test = new Test();
+            test.run();
+        }
+
+        const main = new Main(
+            document.getElementById('board-canvas'),
+            document.getElementById('network-canvas')
+        );
+        //main.animate();
+        main.train();
+
+
+        function save() {
+            main.save();
+        }
+
+        function discard() {
+            localStorage.removeItem("bestSelfCardDrive");
+        }
+    </script>
 </body>

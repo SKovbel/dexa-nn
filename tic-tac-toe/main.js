@@ -90,24 +90,3 @@ class Main {
         requestAnimationFrame(this.animate.bind(this));
     }
 }
-
-if (getGetParam('test')) {
-    const test = new Test();
-    test.run();
-}
-
-const main = new Main(
-    document.getElementById('board-canvas'),
-    document.getElementById('network-canvas')
-);
-//main.animate();
-main.train();
-
-
-function save() {
-    main.save();
-}
-
-function discard() {
-    localStorage.removeItem("bestSelfCardDrive");
-}
