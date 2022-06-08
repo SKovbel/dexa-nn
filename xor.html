@@ -2,10 +2,27 @@
 <head>
     <title>XOR</title>
     <link rel="stylesheet" href="styles/xor.css">
-</head>
-<body>
-    <div id="content"></div>
     <script src="libs/network/network.js"></script>
     <script src="libs/network/back-propagation.js"></script>
     <script src="xor/main.js"></script>
+</head>
+<body>
+    <pre id="content"></pre>
+    <button id="restart" onclick="restart();">Restart</button>
+    <script>
+        function restart() {
+            const content = document.getElementById('content');
+            const visual = document.getElementById('network-canvas');
+            const button = document.getElementById('restart');
+
+            const nn = new Main(content, visual);
+
+            content.innerHTML = '';
+            button.disabled = true;
+            nn.train();
+            nn.test();
+            button.disabled = false;
+        }
+        restart();
+    </script>
 </body>
