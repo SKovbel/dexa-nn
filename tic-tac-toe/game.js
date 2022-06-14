@@ -25,7 +25,6 @@ class Game {
         if (this.status() === null) {
             const turn = this.turn();
             const bestMove = turn ? this.engineX.move(this) : this.engineO.move(this);
-            console.log(bestMove);
             this.hist.push(bestMove);
             this.fields[bestMove] = turn;
         }

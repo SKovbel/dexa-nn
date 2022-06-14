@@ -12,7 +12,6 @@ class Main {
     }
 
     #restart() {
-        console.log('game start');
         let depth = 10 * Math.random();
         if (Math.random() > 0.5) {
             this.game = new Game(
@@ -32,41 +31,20 @@ class Main {
     // loop to the end of game, after restart game
     #play() {
         const status = this.game.status();
-        console.log(this.game.fields);
+
         if (status === null) { // move
             this.game.move();
-            return; // avoid game restarts
+            return;
 
         } else if (status == 0) { // draw
             console.log('draw');
+            this.#restart();
 
         } else { // won
             const win = status == 1 ? this.game.engineX : this.game.engineO;
             console.log(win.code + ' won');
-            /*
-            const nnEngine = this.game.engineX.code == 'network' ? this.game.engineX : this.game.engineO;
-            const nnWin = (status > 0 && this.game.engineX.code == 'network') || (status < 0 && this.game.engineO.code == 'network');
-            for (let i = 0; i < this.trains.length; i++) {
-                const turn = i % 2 == 0 ? 1 : -1;
-                if (turn == status) {
-                    this.batchTrains.push(this.trains[i])
-                };
-            }
-            if (this.batchTrains.length > this.maxIteration) {
-                const maxError = 0.1;
-                const totalError = NeuralNetworkBackPropagation.train(nnEngine.nn, NeuralNetworkBackPropagation.SGD, this.batchTrains, 0.01, 0.1, 100000);
-                //if (totalError <= maxError) {
-                    this.maxIteration += 3;
-                    console.log('saveNN, error=' + totalError);
-                    nnEngine.saveNN();
-                //} else {
-                //    console.log('error=' + totalError);
-                //}
-                this.batchTrains = [];
-            }*/
+            this.#restart();
         }
-
-        this.#restart();
     }
 
 
