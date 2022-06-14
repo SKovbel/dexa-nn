@@ -1,59 +1,54 @@
 class Main {
     constructor(boardCanvas, networkCanvas) {
-        this.maxGames = 1000;
-
         this.networkCanvas = networkCanvas;
         this.networkCtx = this.networkCanvas.getContext('2d');
         this.networkCanvas.width = 500;
 
-        this.maxIteration = 100;
+        this.maxIteration = 10;
         this.batchTrains = [];
         this.board = new Board(this.boardCtx);
-        this.#restartGame();
+
+        this.#restart();
     }
 
-    #restartGame() {
-        this.trains = [];
-        this.maxGames--;
+    #restart() {
+        console.log('game start');
         let depth = 10 * Math.random();
-        depth = 1;
-
         if (Math.random() > 0.5) {
             this.game = new Game(
                 new MinimaxEngine(depth),
-                new NetworkEngine()
+                new MinimaxEngine(depth)
+                //new NetworkEngine()
             );
         } else {
             this.game = new Game(
-                new NetworkEngine(),
+                //new NetworkEngine(),
+                new MinimaxEngine(depth),
                 new MinimaxEngine(depth)
             );
         }
     }
 
-    #playGame() {
-        if (this.game.status === null) { // move
-            const data = {inputs: [ ...this.game.fields, this.game.who], outputs: [0,0,0, 0,0,0, 0,0,0]};
+    // loop to the end of game, after restart game
+    #play() {
+        const status = this.game.status();
+        console.log(this.game.fields);
+        if (status === null) { // move
             this.game.move();
-            data.outputs[this.game.lastMove] = 1;
-            this.trains.push(data);
             return; // avoid game restarts
-        }
-        
-        if (this.status == 0) { // draw
+
+        } else if (status == 0) { // draw
             console.log('draw');
 
         } else { // won
+            const win = status == 1 ? this.game.engineX : this.game.engineO;
+            console.log(win.code + ' won');
+            /*
             const nnEngine = this.game.engineX.code == 'network' ? this.game.engineX : this.game.engineO;
-            const nnWin = (this.status > 0 && this.game.engineX.code == 'network') || (this.status < 0 && this.game.engineO.code == 'network');
-            if (nnWin) {
-                console.log('Network won');
-            } else {
-                console.log('MiniMax won');
-            }
+            const nnWin = (status > 0 && this.game.engineX.code == 'network') || (status < 0 && this.game.engineO.code == 'network');
             for (let i = 0; i < this.trains.length; i++) {
-                const who = i % 2 == 0 ? 1 : -1;
-                if (who == this.game.status) {
+                const turn = i % 2 == 0 ? 1 : -1;
+                if (turn == status) {
                     this.batchTrains.push(this.trains[i])
                 };
             }
@@ -68,15 +63,16 @@ class Main {
                 //    console.log('error=' + totalError);
                 //}
                 this.batchTrains = [];
-            }
+            }*/
         }
 
-        this.#restartGame();
+        this.#restart();
     }
 
+
     train() {
-        this.#playGame();
-        if (this.maxGames) {
+        this.#play();
+        if (this.maxIteration-- > 0) {
             this.train();
         }
     }
@@ -86,7 +82,7 @@ class Main {
         this.networkCanvas.height = window.innerHeight;
         NeuralNetworkVisualizer.drawNetwork(this.networkCtx, nnEngine.nn, []);
 
-        //this.#playGame();
+        //this.#play();
         requestAnimationFrame(this.animate.bind(this));
     }
 }

@@ -45,10 +45,10 @@ class Board {
             this.ctx.textBaseLine = "middle";
             this.ctx.fillStyle = "green";
             this.ctx.font = "30px Arial";
-            this.ctx.fillText(game.undo[index], piecePosition[index][0] + undoMarging, piecePosition[index][1]);
+            this.ctx.fillText(game.hist[index], piecePosition[index][0] + undoMarging, piecePosition[index][1]);
         });
 
-        const msg = 'mv: ' + this.pieces[game.who] + '; ' + this.status[game.status] + '; X:' + game.engineX.code;
+        const msg = 'mv: ' + this.pieces[game.turn()] + '; ' + this.status[game.status()] + '; X:' + game.engineX.code;
         this.ctx.beginPath();
         this.ctx.textAlign = "center";
         this.ctx.textBaseLine = "middle";

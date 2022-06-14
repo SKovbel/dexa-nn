@@ -1,5 +1,5 @@
 class NetworkEngine {
-    static nnName = 'tic-tac-toe';
+    static nnName = 'nn-tic-tac-toe';
 
     constructor(mutation = 0) {
         this.code = 'network';
@@ -13,14 +13,14 @@ class NetworkEngine {
     }
 
     move(game) {
-        const data = [ ...game.fields, game.who];
+        const data = [ ...game.fields, game.turn];
         let maxMove = 0;
         let bestMove = -Infinity;
         for (let i = 0; i < data.length - 1; i++) {
             if (game.fields[i] != 0) {
                 continue;
             }
-            data[i] = game.who;
+            data[i] = game.turn();
             const outputs = NeuralNetwork.feedforward(this.nn, data);
             if (outputs[0] > maxMove) {
                 bestMove = i;
