@@ -16,3 +16,10 @@
     border: 1px solid blue;
     background: black;
 }
+
+#stats {
+    vertical-align: top;
+    height: 90vh;
+    text-align: left;
+    padding-right: 20px;
+}

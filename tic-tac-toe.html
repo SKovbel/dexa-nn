@@ -20,12 +20,13 @@
     <div id="info">
         
     </div>
+    <div id="verticalButtons">
+        <button onclick="save()">💾</button>
+        <button onclick="discard()">📄</button>
+    </div>
     <div id="content">
-        <canvas id="board-canvas"></canvas>
-        <div id="verticalButtons">
-            <button onclick="save()">💾</button>
-            <button onclick="discard()">📄</button>
-        </div>
+        <pre id="stats"></pre>
+        <!--canvas id="board-canvas"></canvas-->
         <canvas id="network-canvas"></canvas>
     </div>
 
@@ -36,6 +37,7 @@
         }
 
         const main = new Main(
+            document.getElementById('stats'),
             document.getElementById('board-canvas'),
             document.getElementById('network-canvas')
         );

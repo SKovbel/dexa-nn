@@ -1,6 +1,7 @@
 class Main {
-    constructor(boardCanvas, networkCanvas) {
+    constructor(statsElement, boardCanvas, networkCanvas) {
         this.stats = {};
+        this.statsElement = statsElement;
         this.networkCanvas = networkCanvas;
         this.networkCtx = this.networkCanvas.getContext('2d');
         this.networkCanvas.width = 500;
@@ -84,14 +85,18 @@ class Main {
                 keys2[key2] = key2;
             }
         }
-        console.log(line)
+        line += "\n";
         for (let key2 in keys2) {
-            line = key2.padStart(10);
+            line += key2.padStart(10);
             for (let key in this.stats) {
                 const val = key2 in this.stats[key] ? this.stats[key][key2] : 0;
                 line += ('' + val).padStart(10);
             }
-            console.log(line)
+            line += "\n";
         }
+
+        const msg = document.createElement('p');
+        msg.innerText = line;
+        this.statsElement.append(msg);
     }
 }
