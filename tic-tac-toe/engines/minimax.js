@@ -4,8 +4,19 @@ class MinimaxEngine {
         this.maxDepth = maxDepth;
     }
 
+    start (game) {
+
+    }
+
+    end(game) {
+
+    }
+
     move(game) {
-        const bestFields = MinimaxEngine.#minimax(game.fields, game.turn(), 0, this.maxDepth)
+        const checkCallback = function(fields) {
+            return game.status(fields);
+        };
+        const bestFields = this.#minimax(game.fields, game.turn(), 0, this.maxDepth, checkCallback);
         return bestFields[Math.floor(Math.random() * bestFields.length)];
     }
 
@@ -13,9 +24,9 @@ class MinimaxEngine {
      * fields - flat array [-1, 0, 0, -1, ]
      * turn -1 or 1
      */
-    static #minimax(fields, turn, depth, maxDepth) {
+    #minimax(fields, turn, depth, maxDepth, checkCallback) {
         if (depth) {
-            const win = Game.status(fields);
+            const win = checkCallback(fields);
             if (win !== null) {
                 return win / depth;
             }
@@ -33,7 +44,7 @@ class MinimaxEngine {
             }
 
             fields[i] = turn;
-            const score = MinimaxEngine.#minimax(fields, -turn, depth + 1, maxDepth);
+            const score = this.#minimax(fields, -turn, depth + 1, maxDepth, checkCallback);
             if (turn > 0 && score >= bestScore) {
                 if (bestScore != score) {
                     bestFields = [];

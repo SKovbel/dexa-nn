@@ -3,36 +3,43 @@ class Game {
     constructor(engineX, engineO) {
         this.engineX = engineX;
         this.engineO = engineO;
-        this.new();
+        this.game();
     }
 
     // new game
-    new() {
+    game() {
         this.hist = [];
         this.fields = new Array(9);
         for (let i = 0; i < this.fields.length; i++) {
             this.fields[i] = 0;
         }
+        this.engineX.start(this); // says engine about start game
+        this.engineO.start(this);
     }
 
-    // who's move X=1, O=-1
+    // who's turn X=1, O=-1
     turn() {
         return this.hist.length % 2 == 0 ? 1 : -1;
     }
 
     // make move
     move() {
-        if (this.status() === null) {
-            const turn = this.turn();
-            const bestMove = turn ? this.engineX.move(this) : this.engineO.move(this);
-            this.hist.push(bestMove);
-            this.fields[bestMove] = turn;
+        let status = this.status();
+        if (status !== null) { // game already finished
+            return status;
         }
-    }
 
-    // game status - who won, draw, or is not finished game
-    status() {
-        return Game.status(this.fields);
+        const turn = this.turn();
+        const bestMove = turn == 1 ? this.engineX.move(this) : this.engineO.move(this);
+        this.hist.push(bestMove);
+        this.fields[bestMove] = turn;
+
+        status = this.status();
+        if (status !== null) { // game is finished
+            this.engineX.end(this);
+            this.engineO.end(this);
+        }
+        return status;
     }
 
     /**
@@ -41,7 +48,9 @@ class Game {
      * -1   - 0 won
      * null - game is not finished
      */
-    static status(fields = []) {
+    status(fields = []) {
+        fields = fields.length == 0 ? this.fields : fields;
+
         const rules = [
             [0, 1, 2], [3, 4, 5], [6, 7, 8], // horz
             [0, 3, 6], [1, 4, 7], [2, 5, 8], // vert

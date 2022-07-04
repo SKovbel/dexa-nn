@@ -12,6 +12,7 @@
     <script src="tic-tac-toe/game.js"></script>
     <script src="tic-tac-toe/engines/minimax.js"></script>
     <script src="tic-tac-toe/engines/network.js"></script>
+    <script src="tic-tac-toe/engines/qlearning.js"></script>
     <script src="tic-tac-toe/main.js"></script>
 </head>
 
@@ -39,7 +40,7 @@
             document.getElementById('network-canvas')
         );
         //main.animate();
-        main.train();
+        main.play();
 
 
         function save() {
@@ -47,7 +48,7 @@
         }
 
         function discard() {
-            localStorage.removeItem("bestSelfCardDrive");
+            localStorage.removeItem("ql-tic-tac-toe");
         }
     </script>
 </body>
