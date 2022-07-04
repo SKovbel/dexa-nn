@@ -2,7 +2,6 @@ class NetworkEngine {
     static nnName = 'nn-tic-tac-toe';
 
     constructor(mutation = 0) {
-        this.code = 'network';
         this.mutation = mutation;
         this.nn = new NeuralNetwork([
             {size: 10, activation: NeuralNetworkActivation.SIGMOID},
@@ -10,6 +9,10 @@ class NetworkEngine {
             {size: 9}
         ]);
         this.loadNN();
+    }
+
+    code() {
+        return 'network';
     }
 
     move(game) {

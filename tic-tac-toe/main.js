@@ -5,7 +5,7 @@ class Main {
         this.networkCtx = this.networkCanvas.getContext('2d');
         this.networkCanvas.width = 500;
 
-        this.maxGames = 100;
+        this.maxGames = 1000;
         this.batchTrains = [];
         this.board = new Board(this.boardCtx);
 
@@ -13,7 +13,8 @@ class Main {
     }
 
     #restart() {
-        let depth = 10 // * Math.random();
+        let depth = Math.round(8 * Math.random());
+        depth = 4;
         if (Math.random() > 0.5) {
             this.game = new Game(
                 new MinimaxEngine(depth),
@@ -43,7 +44,7 @@ class Main {
     }
 
     animate(time) {
-        const nnEngine = this.game.engineX.code == 'network' ? this.game.engineX : this.game.engineO;
+        const nnEngine = this.game.engineX.code() == 'network' ? this.game.engineX : this.game.engineO;
         this.networkCanvas.height = window.innerHeight;
         NeuralNetworkVisualizer.drawNetwork(this.networkCtx, nnEngine.nn, []);
 
@@ -64,13 +65,13 @@ class Main {
         const lost = status == 1 ? game.engineO : game.engineX;
 
         if (status != 0) {
-            incStats('won', win.code);
-            incStats('lost', lost.code);
-            incStats('won-' + wwin, win.code);
-            incStats('lost-' + wlost, lost.code);
+            incStats('won', win.code());
+            incStats('lost', lost.code());
+            incStats('won-' + wwin, win.code());
+            incStats('lost-' + wlost, lost.code());
         } else {
-            incStats('draw-' + wwin, win.code);
-            incStats('draw-' + wlost, lost.code);
+            incStats('draw-' + wwin, win.code());
+            incStats('draw-' + wlost, lost.code());
         }
     }
 

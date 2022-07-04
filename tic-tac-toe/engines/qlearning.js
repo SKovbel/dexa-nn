@@ -1,10 +1,15 @@
 class QLearningEngine {
-    static name = 'ql-tic-tac-toe';
+    static matrixName = 'ql-tic-tac-toe-matrix';
+    static policyName = 'ql-tic-tac-toe-policy';
 
     constructor() {
-        this.matrix = {};
+        this.matrix = null;
+        this.policy = null;
         this.games = [];
-        this.code = 'qlearning';
+    }
+
+    code() {
+        return 'qlearning';
     }
 
     start (game) {
@@ -12,6 +17,8 @@ class QLearningEngine {
     }
 
     move(game) {
+        this.#load();
+
         const turn = game.turn();
         let bestValue = -Infinity;
         let bestMove = null;
@@ -20,14 +27,12 @@ class QLearningEngine {
                 continue;
             }
             game.fields[i] = turn;
-            const index = this.#gameToIndex(game.fields)
-            const gameValue = this.#findValue(index);
-            if (gameValue) {
-                if (gameValue > bestValue) {
-                    bestValue = gameValue;
-                    bestMove = i;
-                }
-            } else if (bestValue < 0) {
+            const index = this.#getPositionIndex(game.fields)
+            const value = this.#getPositionValue(index);
+            if (value > bestValue) {
+                bestValue = value;
+                bestMove = i;
+            } else if (value == null && bestValue < 0) {
                 bestValue = 0;
                 bestMove = i;
             }
@@ -37,21 +42,22 @@ class QLearningEngine {
     }
 
     end(game) {
-        this.load();
+        this.#load(true);
 
-        let fields = [...game.fields];
-
-        let index = this.#gameToIndex(fields)
-        if (index in this.matrix) {
+        let gameIdx = this.#getGameIndex(game.hist)
+        if (gameIdx in this.policy) {
+            this.policy[gameIdx] = this.policy[gameIdx] + 1;
+            this.#save();
             return;
         }
 
+        let fields = [...game.fields];
         let reward = Math.abs(game.status()) != 0 ? 2 : 1;
         for (let i = game.hist.length - 1; i >=0; i--,i--) {
-            let index = this.#gameToIndex(fields)
-            const gameValue = this.#findValue(index, 0);
+            let posIdx = this.#getPositionIndex(fields)
+            const gameValue = this.#getPositionValue(posIdx, 0);
             reward = gameValue + 0.9 * (reward - gameValue);
-            this.matrix[index] = reward;
+            this.matrix[posIdx] = reward;
             fields[game.hist[i]] = 0;
             fields[game.hist[i - 1]] = 0;
         }
@@ -62,18 +68,27 @@ class QLearningEngine {
         reward = Math.abs(game.status()) != 0 ? -1 : 1;
         for (let i = game.hist.length - 2; i >=0; i--,i--) {
             fields[game.hist[i + 1]] = 0;
-            let index = this.#gameToIndex(fields)
-            const gameValue = this.#findValue(index, 0);
+            let posIdx = this.#getPositionIndex(fields)
+            const gameValue = this.#getPositionValue(posIdx, 0);
             reward = gameValue + 0.9 * (reward - gameValue);
-            this.matrix[index] = reward;
+            this.matrix[posIdx] = reward;
             fields[game.hist[i]] = 0;
             fields[game.hist[i - 1]] = 0;
         }
 
-        this.save();
+        this.policy[gameIdx] = 1;
+        this.#save();
     }
 
-    #gameToIndex(fields) {
+    #getGameIndex(hist) {
+        let value = '';
+        for (let i = 0; i < hist.length; i++) {
+            value += '' + hist[i];
+        }
+        return value; 
+    }
+
+    #getPositionIndex(fields) {
         let value = '';
         for (let i = 0; i < fields.length; i++) {
             let val = '-';
@@ -84,21 +99,25 @@ class QLearningEngine {
         return value; 
     }
 
-    #findValue(index, def = null) {
-        if (index in this.matrix) {
-            return this.matrix[index];
-        }
-        return def;
+    #getPositionValue(index, def = null) {
+        return index in this.matrix ? this.matrix[index] : def;
     }
 
-    load(i) {
-        if (localStorage.getItem(QLearningEngine.name)) {
-            this.matrix = JSON.parse(localStorage.getItem(QLearningEngine.name));
+    #load(forse = false) {
+        if (this.matrix && !forse) {
+            return;
+        }
+        if (localStorage.getItem(QLearningEngine.matrixName)) {
+            this.matrix = JSON.parse(localStorage.getItem(QLearningEngine.matrixName));
+            this.policy = JSON.parse(localStorage.getItem(QLearningEngine.policyName));
+        } else {
+            this.matrix = {};
+            this.policy = {};
         }
     }
 
-    save() {
-        const dataJson = JSON.stringify(this.matrix);
-        localStorage.setItem(QLearningEngine.name, dataJson);
+    #save() {
+        localStorage.setItem(QLearningEngine.matrixName, JSON.stringify(this.matrix));
+        localStorage.setItem(QLearningEngine.policyName, JSON.stringify(this.policy));
     }
 }

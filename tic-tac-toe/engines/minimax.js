@@ -1,7 +1,10 @@
 class MinimaxEngine {
     constructor(maxDepth = 2) {
-        this.code = 'minimax';
         this.maxDepth = maxDepth;
+    }
+
+    code() {
+        return 'minimax-' + this.maxDepth;
     }
 
     start (game) {
