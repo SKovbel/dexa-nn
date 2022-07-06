@@ -51,29 +51,21 @@ class QLearningEngine {
             return;
         }
 
+        const status = game.status();
         let fields = [...game.fields];
-        let reward = Math.abs(game.status()) != 0 ? 2 : 1;
-        for (let i = game.hist.length - 1; i >=0; i--,i--) {
-            let posIdx = this.#getPositionIndex(fields)
+        let rewardA = Math.abs(status) != 0 ? 2 : 1;
+        let rewardB = Math.abs(status) != 0 ? -1 : 1;
+        for (let i = game.hist.length - 1, k = true; i >=0; i--, k = !k) {
+            const posIdx = this.#getPositionIndex(fields)
             const gameValue = this.#getPositionValue(posIdx, 0);
-            reward = gameValue + 0.9 * (reward - gameValue);
-            this.matrix[posIdx] = reward;
+            if (k) {
+                rewardA = gameValue + 0.9 * (rewardA - gameValue);
+                this.matrix[posIdx] = rewardA;
+            } else {
+                rewardB = gameValue + 0.9 * (rewardB - gameValue);
+                this.matrix[posIdx] = rewardB;
+            }
             fields[game.hist[i]] = 0;
-            fields[game.hist[i - 1]] = 0;
-        }
-
-        fields = [...game.fields];
-        const last = game.hist[game.hist.length - 1];
-        fields[last] = 0;
-        reward = Math.abs(game.status()) != 0 ? -1 : 1;
-        for (let i = game.hist.length - 2; i >=0; i--,i--) {
-            fields[game.hist[i + 1]] = 0;
-            let posIdx = this.#getPositionIndex(fields)
-            const gameValue = this.#getPositionValue(posIdx, 0);
-            reward = gameValue + 0.9 * (reward - gameValue);
-            this.matrix[posIdx] = reward;
-            fields[game.hist[i]] = 0;
-            fields[game.hist[i - 1]] = 0;
         }
 
         this.policy[gameIdx] = 1;

@@ -15,6 +15,7 @@ class Main {
 
     #restart() {
         let depth = Math.round(6 * Math.random());
+        depth = 4;
         if (Math.random() > 0.5) {
             this.game = new Game(
                 new MinimaxEngine(depth),
