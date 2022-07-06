@@ -58,7 +58,7 @@ class Main {
             this.stats[index] = index in this.stats ? this.stats[index] : {};
             this.stats[index][who] = who in this.stats[index] ? this.stats[index][who] : 0;
             this.stats[index][who]++;
-        }
+        };
         const status = game.status();
         const wwin = status == 1 ? 'X' : '0';
         const wlost = status == 1 ? '0' : 'X';
@@ -78,7 +78,7 @@ class Main {
 
     printStats() {
         let line = "".padStart(10);
-        let keys2 = {}
+        let keys2 = {};
         for (let key in this.stats) {
             line += key.padStart(10);
             for (let key2 in this.stats[key]) {

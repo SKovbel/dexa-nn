@@ -15,7 +15,7 @@ class Sensor {
         for (let i =0; i < this.rays.length; i++) {
             this.readings.push(
                 this.#getReading(this.rays[i], roadBorders, traffics)
-            )
+            );
         }
     }
 
@@ -27,7 +27,7 @@ class Sensor {
                 ray[1],
                 roadBorders[i][0],
                 roadBorders[i][1]
-            )
+            );
             if (touch) {
                 touches.push(touch);
             }
@@ -66,7 +66,7 @@ class Sensor {
                 -this.raySpread/2,
                 this.rayCount == 1 ? 0.5 : i/(this.rayCount - 1)
             ) + this.car.angle;
-            
+
             const start = {x: this.car.x, y: this.car.y};
             const end = {
                 x: this.car.x - Math.sin(rayAngle) * this.rayLength,

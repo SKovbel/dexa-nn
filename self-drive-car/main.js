@@ -55,7 +55,7 @@ class Main {
             let speed =  (Math.floor(Math.random() * (2*this.maxTraficSpeed - this.minTraficSpeed + 1)) + this.minTraficSpeed) / 2;
             this.traffics.push(new Car(
                 this.road.getLaneCenter(lane), -100 * position, 30, 50, "DUMMY", speed
-            ))
+            ));
         }
     }
 

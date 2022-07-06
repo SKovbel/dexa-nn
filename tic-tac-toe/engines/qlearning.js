@@ -27,7 +27,7 @@ class QLearningEngine {
                 continue;
             }
             game.fields[i] = turn;
-            const index = this.#getPositionIndex(game.fields)
+            const index = this.#getPositionIndex(game.fields);
             const value = this.#getPositionValue(index);
             if (value > bestValue) {
                 bestValue = value;
@@ -45,7 +45,7 @@ class QLearningEngine {
         this.#load(true);
 
         // game already calculated
-        let gameIdx = this.#getGameIndex(game.hist)
+        let gameIdx = this.#getGameIndex(game.hist);
         if (gameIdx in this.policy) {
             this.policy[gameIdx] = this.policy[gameIdx] + 1;
             this.#save();
@@ -57,7 +57,7 @@ class QLearningEngine {
         let rewardA = Math.abs(status) != 0 ? 2 : 1; // last move win (if game status = -1 || 1) or draw (if 0). Last move can be as X as O
         let rewardB = Math.abs(status) != 0 ? -1 : 1; // prev move lost (if game status = -1 || 1) or draw
         for (let i = game.hist.length - 1, k = true; i >=0; i--, k = !k) {
-            const posIdx = this.#getPositionIndex(fields)
+            const posIdx = this.#getPositionIndex(fields);
             const gameValue = this.#getPositionValue(posIdx, 0);
             if (k) { // calculates X and O rewards separatly
                 rewardA = gameValue + 0.9 * (rewardA - gameValue);

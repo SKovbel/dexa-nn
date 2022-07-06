@@ -58,7 +58,7 @@ class Board {
 
         this.ctx.restore();
     }
-    
+
     #getPiecePositions() {
         if (!this.piecePositions) {
             const h0 = this.ctx.canvas.clientHeight;
@@ -73,7 +73,7 @@ class Board {
                 [lerp(0, w0, 1/6), lerp(0, h0, 8/9)],
                 [lerp(0, w0, 3/6), lerp(0, h0, 8/9)],
                 [lerp(0, w0, 5/6), lerp(0, h0, 8/9)]
-            ]
+            ];
         }
         return this.piecePositions;
     }
