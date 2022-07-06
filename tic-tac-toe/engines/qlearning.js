@@ -120,4 +120,9 @@ class QLearningEngine {
         localStorage.setItem(QLearningEngine.matrixName, JSON.stringify(this.matrix));
         localStorage.setItem(QLearningEngine.policyName, JSON.stringify(this.policy));
     }
+
+    static discard() {
+        localStorage.removeItem(QLearningEngine.matrixName);
+        localStorage.removeItem(QLearningEngine.policyName);
+    }
 }

@@ -40,7 +40,7 @@ class Main {
         for (let i = 0; i < this.maxCars; i++) {
             this.cars.push(new Car(this.road.getLaneCenter(1), this.carStartsY, 30, 50, "AI", 3));
         }
-        this.LoadNN();
+        this.load();
         this.bestCar = this.cars[0];
     }
 
@@ -59,13 +59,13 @@ class Main {
         }
     }
 
-    saveNN() {
+    save() {
         console.log('Saved');
         const jsonData = NeuralNetworkTools.export(this.bestCar.nn);
         localStorage.setItem(Main.nnName, jsonData);
     }
 
-    LoadNN() {
+    load() {
         const data = localStorage.getItem(Main.nnName);
         if (data) {
             for (let i = 0; i < this.cars.length; i++) {
@@ -74,7 +74,7 @@ class Main {
         }
     }
 
-    discardNN() {
+    discard() {
         localStorage.removeItem(Main.nnName);
     }
 
@@ -123,7 +123,7 @@ class Main {
         }
         if (this.iter > this.maxIter || cntUsefulCars == 0) {
             if (cntUsefulCars) {
-                this.saveNN();
+                this.save();
             }
             this.mutationAmount -= this.mutationDelta;
             console.log('Mutation K = ' + this.mutationAmount);

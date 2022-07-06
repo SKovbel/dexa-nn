@@ -8,7 +8,7 @@ class NetworkEngine {
             {size: 10, activation: NeuralNetworkActivation.SIGMOID},
             {size: 9}
         ]);
-        this.loadNN();
+        this.#load();
     }
 
     code() {
@@ -34,7 +34,7 @@ class NetworkEngine {
         return bestMove;
     }
 
-    loadNN(i) {
+    #load(i) {
         if (localStorage.getItem(NetworkEngine.nnName)) {
             this.nn = NeuralNetworkTools.import(
                 localStorage.getItem(NetworkEngine.nnName),
@@ -43,12 +43,12 @@ class NetworkEngine {
         }
     }
 
-    saveNN() {
+    #save() {
         const dataJson = NeuralNetworkTools.export(this.nn);
         localStorage.setItem(NetworkEngine.nnName, dataJson);
     }
 
-    discardNN() {
+    static discard() {
         localStorage.removeItem(NetworkEngine.nnName);
     }
 }
