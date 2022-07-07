@@ -42,6 +42,11 @@ class QLearningEngine {
     }
 
     end(game) {
+        const K = 0.9
+        const WIN = 1;
+        const DRW = 0;
+        const LST = -1;
+
         this.#load(true);
 
         // game already calculated
@@ -54,17 +59,17 @@ class QLearningEngine {
 
         const status = game.status();
         let fields = [...game.fields];
-        let rewardA = Math.abs(status) != 0 ? 2 : 1; // last move win (if game status = -1 || 1) or draw (if 0). Last move can be as X as O
-        let rewardB = Math.abs(status) != 0 ? -1 : 1; // prev move lost (if game status = -1 || 1) or draw
-        for (let i = game.hist.length - 1, k = true; i >=0; i--, k = !k) {
+        let rewardA = Math.abs(status) != 0 ? WIN : DRW; // last move win (if game status = -1 || 1) or draw (if 0). Last move can be as X as O
+        let rewardB = Math.abs(status) != 0 ? LST : DRW; // prev move lost (if game status = -1 || 1) or draw
+        for (let i = game.hist.length - 1, k = true; i >= 0; i--, k = !k) {
             const posIdx = this.#getPositionIndex(fields);
             const gameValue = this.#getPositionValue(posIdx, 0);
             if (k) { // calculates X and O rewards separatly
-                rewardA = gameValue + 0.9 * (rewardA - gameValue);
                 this.matrix[posIdx] = rewardA;
+                rewardA = gameValue + K * (rewardA - gameValue);
             } else {
-                rewardB = gameValue + 0.9 * (rewardB - gameValue);
                 this.matrix[posIdx] = rewardB;
+                rewardB = gameValue + K * (rewardB - gameValue);
             }
             fields[game.hist[i]] = 0;
         }

@@ -20,9 +20,11 @@ class Main {
             this.game = new Game(
                 new MinimaxEngine(depth),
                 new QLearningEngine()
+                //new NetworkEngine()
             );
         } else {
             this.game = new Game(
+                //new NetworkEngine(),
                 new QLearningEngine(),
                 new MinimaxEngine(depth)
             );
@@ -38,8 +40,6 @@ class Main {
             this.addStats(this.game);
             this.#restart();
             this.maxGames--;
-            console.log(this.maxGames);
-            //return;
         } while (this.maxGames > 0);
         this.printStats();
     }
@@ -48,8 +48,6 @@ class Main {
         const nnEngine = this.game.engineX.code() == 'network' ? this.game.engineX : this.game.engineO;
         this.networkCanvas.height = window.innerHeight;
         NeuralNetworkVisualizer.drawNetwork(this.networkCtx, nnEngine.nn, []);
-
-        //this.#play();
         requestAnimationFrame(this.animate.bind(this));
     }
 
