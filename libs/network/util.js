@@ -8,8 +8,13 @@ class NeuralNetworkTools {
         });
     }
 
+    /**
+     * @param json|object jsonData
+     * @param int mutation 
+     * @returns 
+     */
     static import(jsonData, mutation = 0) {
-        const network = JSON.parse(jsonData);
+        const network = typeof jsonData === 'string' ? JSON.parse(jsonData) : jsonData;
         for (let l = 0; l < network.layers.length; l++) {
             NeuralNetworkLayer.init(network.layers[l]);
         }

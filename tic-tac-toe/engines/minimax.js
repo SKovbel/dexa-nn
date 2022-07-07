@@ -1,25 +1,12 @@
-class MinimaxEngine {
+class MinimaxEngine extends TicTacToeEngine {
     constructor(maxDepth = 2) {
+        super();
+        this.code = 'minimax-' + maxDepth;
         this.maxDepth = maxDepth;
     }
 
-    code() {
-        return 'minimax-' + this.maxDepth;
-    }
-
-    start (game) {
-
-    }
-
-    end(game) {
-
-    }
-
     move(game) {
-        const checkCallback = function(fields) {
-            return game.status(fields);
-        };
-        const bestFields = this.#minimax(game.fields, game.turn(), 0, this.maxDepth, checkCallback);
+        const bestFields = this.#minimax(game.fields, game.turn(), 0, this.maxDepth);
         return bestFields[Math.floor(Math.random() * bestFields.length)];
     }
 
@@ -27,9 +14,9 @@ class MinimaxEngine {
      * fields - flat array [-1, 0, 0, -1, ]
      * turn -1 or 1
      */
-    #minimax(fields, turn, depth, maxDepth, checkCallback) {
+    #minimax(fields, turn, depth, maxDepth) {
         if (depth) {
-            const win = checkCallback(fields);
+            const win = GameStatus.status(fields);
             if (win !== null) {
                 return win / depth;
             }
@@ -47,7 +34,7 @@ class MinimaxEngine {
             }
 
             fields[i] = turn;
-            const score = this.#minimax(fields, -turn, depth + 1, maxDepth, checkCallback);
+            const score = this.#minimax(fields, -turn, depth + 1, maxDepth);
             if (turn > 0 && score >= bestScore) {
                 if (bestScore != score) {
                     bestFields = [];

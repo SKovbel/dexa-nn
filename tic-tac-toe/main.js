@@ -39,13 +39,14 @@ class Main {
             }
             this.addStats(this.game);
             this.#restart();
+            (new NetworkEngine).train([this.game.fields, this.game.hist]);
             this.maxGames--;
         } while (this.maxGames > 0);
         this.printStats();
     }
 
     animate(time) {
-        const nnEngine = this.game.engineX.code() == 'network' ? this.game.engineX : this.game.engineO;
+        const nnEngine = this.game.engineX.code == 'network' ? this.game.engineX : this.game.engineO;
         this.networkCanvas.height = window.innerHeight;
         NeuralNetworkVisualizer.drawNetwork(this.networkCtx, nnEngine.nn, []);
         requestAnimationFrame(this.animate.bind(this));
@@ -64,13 +65,13 @@ class Main {
         const lost = status == 1 ? game.engineO : game.engineX;
 
         if (status != 0) {
-            incStats('won', win.code());
-            incStats('lost', lost.code());
-            incStats('won-' + wwin, win.code());
-            incStats('lost-' + wlost, lost.code());
+            incStats('won', win.code);
+            incStats('lost', lost.code);
+            incStats('won-' + wwin, win.code);
+            incStats('lost-' + wlost, lost.code);
         } else {
-            incStats('draw-' + wwin, win.code());
-            incStats('draw-' + wlost, lost.code());
+            incStats('draw-' + wwin, win.code);
+            incStats('draw-' + wlost, lost.code);
         }
     }
 

@@ -1,29 +1,19 @@
-class QLearningEngine {
-    static matrixName = 'ql-tic-tac-toe-matrix';
-    static policyName = 'ql-tic-tac-toe-policy';
-
+class QLearningEngine extends TicTacToeEngine {
     constructor() {
+        super();
+        this.code = 'qlearning';
         this.matrix = null;
         this.policy = null;
-        this.games = [];
-    }
-
-    code() {
-        return 'qlearning';
-    }
-
-    start (game) {
-        null; // nothing here
     }
 
     move(game) {
-        this.#load();
+        [this.matrix, this.policy] = this.matrix ? [this.matrix, this.policy] : this.load([{}, {}]);
 
         const turn = game.turn();
         let bestValue = -Infinity;
         let bestMove = null;
         for(let i = 0; i < game.fields.length; i++) {
-            if (game.fields[i] != 0) { // skip moved squares (1 and -1)
+            if (game.fields[i] != 0) { // skip used squares (1 and -1)
                 continue;
             }
             game.fields[i] = turn;
@@ -38,6 +28,7 @@ class QLearningEngine {
             }
             game.fields[i] = 0;
         }
+
         return bestMove
     }
 
@@ -47,13 +38,9 @@ class QLearningEngine {
         const DRW = 0;
         const LST = -1;
 
-        this.#load(true);
-
-        // game already calculated
+        // game already processed
         let gameIdx = this.#getGameIndex(game.hist);
         if (gameIdx in this.policy) {
-            this.policy[gameIdx] = this.policy[gameIdx] + 1;
-            this.#save();
             return;
         }
 
@@ -75,7 +62,7 @@ class QLearningEngine {
         }
 
         this.policy[gameIdx] = 1;
-        this.#save();
+        this.save([this.matrix, this.policy]);
     }
 
     #getGameIndex(hist) {
@@ -99,28 +86,5 @@ class QLearningEngine {
 
     #getPositionValue(index, def = null) {
         return index in this.matrix ? this.matrix[index] : def;
-    }
-
-    #load(forse = false) {
-        if (this.matrix && !forse) {
-            return;
-        }
-        if (localStorage.getItem(QLearningEngine.matrixName)) {
-            this.matrix = JSON.parse(localStorage.getItem(QLearningEngine.matrixName));
-            this.policy = JSON.parse(localStorage.getItem(QLearningEngine.policyName));
-        } else {
-            this.matrix = {};
-            this.policy = {};
-        }
-    }
-
-    #save() {
-        localStorage.setItem(QLearningEngine.matrixName, JSON.stringify(this.matrix));
-        localStorage.setItem(QLearningEngine.policyName, JSON.stringify(this.policy));
-    }
-
-    static discard() {
-        localStorage.removeItem(QLearningEngine.matrixName);
-        localStorage.removeItem(QLearningEngine.policyName);
     }
 }

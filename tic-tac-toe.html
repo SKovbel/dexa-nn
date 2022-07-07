@@ -10,6 +10,7 @@
     <script src="libs/network/backpropagation.js"></script>
     <script src="tic-tac-toe/board-ui.js"></script>
     <script src="tic-tac-toe/game.js"></script>
+    <script src="tic-tac-toe/engines/engine.js"></script>
     <script src="tic-tac-toe/engines/minimax.js"></script>
     <script src="tic-tac-toe/engines/network.js"></script>
     <script src="tic-tac-toe/engines/qlearning.js"></script>
@@ -50,8 +51,8 @@
         }
 
         function discard() {
-            NetworkEngine.discard();
-            QLearningEngine.discard();
+            (new NetworkEngine).discard();
+            (new QLearningEngine).discard();
         }
     </script>
 </body>
