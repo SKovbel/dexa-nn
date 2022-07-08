@@ -59,27 +59,20 @@ class QLearningEngine extends GameEngine {
                 rewardB = gameValue + K * (rewardB - gameValue);
             }
             fields[game.hist[i]] = 0;
-        }
+        }            //value += (field == 1) ? 'X' : (field == -1) ? '0' : '-';
 
-        this.policy[gameIdx] = 1;
-        this.save([this.matrix, this.policy]);
-    }
-
-    #getGameIndex(hist) {
         let value = '';
-        for (let i = 0; i < hist.length; i++) {
-            value += '' + hist[i];
+        for (const item of hist) {
+            value += '' + item;
         }
         return value; 
     }
 
+    #posIndexes = {'-1': '0', '0': '-', '1': 'X'}
     #getPositionIndex(fields) {
         let value = '';
-        for (let i = 0; i < fields.length; i++) {
-            let val = '-';
-            val = fields[i] == 1 ? 'X' : val;
-            val = fields[i] == -1 ? '0' : val;
-            value += val;
+        for (const field of fields) {
+            value += this.#posIndexes[field];
         }
         return value; 
     }
