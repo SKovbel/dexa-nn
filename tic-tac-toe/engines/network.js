@@ -47,16 +47,16 @@ class NetworkEngine extends GameEngine {
             let status = GameStatus.status(fields);
             let rewardA = Math.abs(status) != 0 ? WIN : DRW; // last move win (if game status = -1 || 1) or draw (if 0). Last move can be as X as O
             let rewardB = Math.abs(status) != 0 ? LST : DRW; // prev move lost (if game status = -1 || 1) or draw
-            for (let i = history.length - 1, k = true; i >= 0; i--, k = !k) {
-                const gameValue = 0;
-                if (k) { // calculates X and O rewards separatly
+            for (let i = history.length - 1, p = true; i >= 0; i--, p = !p) {
+                const gameValue = 0; //?
+                if (p) { // calculates players X and O separatly
                     outputs[history[i]] = rewardA;
-                    trains[{'inputs': fields, 'outputs': outputs}];
                     rewardA = gameValue + K * (rewardA - gameValue);
                 } else {
-                    //trains[{'inputs': fields, 'outputs': rewardB}];
+                    outputs[history[i]] = rewardB;
                     rewardB = gameValue + K * (rewardB - gameValue);
                 }
+                trains.push([{'inputs': fields, 'outputs': outputs}]);
                 fields[history[i]] = 0;
                 outputs[history[i]] = 0;
             }

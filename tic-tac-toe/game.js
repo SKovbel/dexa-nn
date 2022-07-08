@@ -25,19 +25,17 @@ class Game {
     // make move
     move() {
         let status = this.status();
-        if (status !== null) { // game already finished
-            return status;
-        }
+        if (status == null) { // game is not finished
+            const turn = this.turn();
+            const bestMove = (turn == 1) ? this.engineX.move(this) : this.engineO.move(this);
+            this.hist.push(bestMove);
+            this.fields[bestMove] = turn;
 
-        const turn = this.turn();
-        const bestMove = turn == 1 ? this.engineX.move(this) : this.engineO.move(this);
-        this.hist.push(bestMove);
-        this.fields[bestMove] = turn;
-
-        status = this.status();
-        if (status !== null) { // game is finished
-            this.engineX.end(this);
-            this.engineO.end(this);
+            status = this.status();
+            if (status !== null) { // check again if last move have finished game?
+                this.engineX.end(this);
+                this.engineO.end(this);
+            }
         }
         return status;
     }
@@ -79,7 +77,7 @@ class GameEngine {
     }
 
     move(game) {
-
+        return null;
     }
 
     end(game) {

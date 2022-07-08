@@ -48,10 +48,10 @@ class QLearningEngine extends GameEngine {
         let fields = [...game.fields];
         let rewardA = Math.abs(status) != 0 ? WIN : DRW; // last move win (if game status = -1 || 1) or draw (if 0). Last move can be as X as O
         let rewardB = Math.abs(status) != 0 ? LST : DRW; // prev move lost (if game status = -1 || 1) or draw
-        for (let i = game.hist.length - 1, k = true; i >= 0; i--, k = !k) {
+        for (let i = game.hist.length - 1, p = true; i >= 0; i--, p = !p) {
             const posIdx = this.#getPositionIndex(fields);
             const gameValue = this.#getPositionValue(posIdx, 0);
-            if (k) { // calculates X and O rewards separatly
+            if (p) { // calculates players X and O separatly
                 this.matrix[posIdx] = rewardA;
                 rewardA = gameValue + K * (rewardA - gameValue);
             } else {
@@ -61,6 +61,14 @@ class QLearningEngine extends GameEngine {
             fields[game.hist[i]] = 0;
         }            //value += (field == 1) ? 'X' : (field == -1) ? '0' : '-';
 
+        let value = '';
+        for (const item of hist) {
+            value += '' + item;
+        }
+        return value; 
+    }
+
+    #getGameIndex(hist) {
         let value = '';
         for (const item of hist) {
             value += '' + item;
