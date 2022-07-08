@@ -1,4 +1,4 @@
-class MinimaxEngine extends TicTacToeEngine {
+class MinimaxEngine extends GameEngine {
     constructor(maxDepth = 2) {
         super();
         this.code = 'minimax-' + maxDepth;

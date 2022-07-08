@@ -1,6 +1,6 @@
 class Main {
     constructor(statsElement, boardCanvas, networkCanvas) {
-        this.stats = {};
+        this.stats = {'won': {}, 'draw': {}, 'lost': {}, 'won-X': {}, 'lost-X': {}, 'won-0': {}, 'lost-0': {}};
         this.statsElement = statsElement;
         this.networkCanvas = networkCanvas;
         this.networkCtx = this.networkCanvas.getContext('2d');
@@ -70,24 +70,23 @@ class Main {
             incStats('won-' + wwin, win.code);
             incStats('lost-' + wlost, lost.code);
         } else {
-            incStats('draw-' + wwin, win.code);
-            incStats('draw-' + wlost, lost.code);
+            incStats('draw', win.code);
         }
     }
 
     printStats() {
         let line = "".padStart(10);
         let keys2 = {};
-        for (let key in this.stats) {
+        for (const key in this.stats) {
             line += key.padStart(10);
             for (let key2 in this.stats[key]) {
                 keys2[key2] = key2;
             }
         }
         line += "\n";
-        for (let key2 in keys2) {
+        for (const key2 in keys2) {
             line += key2.padStart(10);
-            for (let key in this.stats) {
+            for (const key in this.stats) {
                 const val = key2 in this.stats[key] ? this.stats[key][key2] : 0;
                 line += ('' + val).padStart(10);
             }

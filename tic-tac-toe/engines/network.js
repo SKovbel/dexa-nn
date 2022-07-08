@@ -1,4 +1,4 @@
-class NetworkEngine extends TicTacToeEngine {
+class NetworkEngine extends GameEngine {
     constructor() {
         super();
         this.code = 'network';

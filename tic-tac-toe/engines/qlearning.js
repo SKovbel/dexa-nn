@@ -1,4 +1,4 @@
-class QLearningEngine extends TicTacToeEngine {
+class QLearningEngine extends GameEngine {
     constructor() {
         super();
         this.code = 'qlearning';
