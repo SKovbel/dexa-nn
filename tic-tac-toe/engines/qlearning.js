@@ -59,13 +59,10 @@ class QLearningEngine extends GameEngine {
                 rewardB = gameValue + K * (rewardB - gameValue);
             }
             fields[game.hist[i]] = 0;
-        }            //value += (field == 1) ? 'X' : (field == -1) ? '0' : '-';
-
-        let value = '';
-        for (const item of hist) {
-            value += '' + item;
         }
-        return value; 
+
+        this.policy[gameIdx] = 1;
+        this.save([this.matrix, this.policy]);
     }
 
     #getGameIndex(hist) {

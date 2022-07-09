@@ -8,6 +8,7 @@ class Game {
     // new game
     game() {
         this.hist = [];
+        /* X=1, empty=0, 0=-1  */
         this.fields = new Array(9).fill(0);
         this.engineX.start(this); // says engine about start game
         this.engineO.start(this);
@@ -18,8 +19,8 @@ class Game {
         return this.hist.length % 2 == 0 ? 1 : -1;
     }
 
-    status(fields = []) {
-        return GameStatus.status(fields.length == 0 ? this.fields : fields);
+    status() {
+        return GameStatus.status(this.fields);
     }
 
     // make move
