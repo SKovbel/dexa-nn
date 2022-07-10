@@ -29,6 +29,8 @@ class Game {
         if (status == null) { // game is not finished
             const turn = this.turn();
             const bestMove = (turn == 1) ? this.engineX.move(this) : this.engineO.move(this);
+            if (bestMove < -10)
+                console.log(bestMove + (turn == 1 ? this.engineX.code : this.engineO.code));
             this.hist.push(bestMove);
             this.fields[bestMove] = turn;
 

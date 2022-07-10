@@ -17,7 +17,7 @@ class NeuralNetworkBackPropagation {
             totalError = NeuralNetworkBackPropagationSGD.train(network, trains, rate, error, epoch);
         }
         const t1 = performance.now();
-        //console.log('Time: ' + (Math.round((t1 - t0), 2) / 1000) + 's Error=' + totalError);
+        console.log('Time: ' + (Math.round((t1 - t0), 2) / 1000) + 's Error=' + totalError);
         return totalError;
     }
 }
@@ -33,8 +33,8 @@ class NeuralNetworkBackPropagationSGD {
                 totalError += this.backpPropagation(network, trains[t].outputs, rate);
             }
             e++;
+            if (e % 10000 == 0) console.log('Epoch: ' + e + '; ' + 'Error: ' + totalError + '; ');
         } while (totalError > error && e < epoch)
-        //console.log('Epoch: ' + e + '; ' + 'Error: ' + totalError + '; ');
         return totalError;
     }
 

@@ -1,6 +1,6 @@
 class Main {
     constructor(statsElement, boardCanvas, networkCanvas) {
-        this.stats = {'won': {}, 'draw': {}, 'lost': {}, 'won-X': {}, 'lost-X': {}, 'won-0': {}, 'lost-0': {}};
+        this.stats = this.#resetStats();
         this.statsElement = statsElement;
         this.networkCanvas = networkCanvas;
         this.networkCtx = this.networkCanvas.getContext('2d');
@@ -13,36 +13,45 @@ class Main {
         this.#restart();
     }
 
-    #restart() {
+    #getRandomEngine(n = null) {
+        n = n ? n : Math.floor(3 * Math.random() + 1);
+
+        if (n == 2) return new QLearningEngine();
+        if (n == 3) return new NetworkEngine();
+        
         let depth = Math.round(6 * Math.random());
-        depth = 4;
+        return new MinimaxEngine(4);
+    }
+
+    #restart() {
+        const a = this.#getRandomEngine(1);
+        const b = this.#getRandomEngine(3);
         if (Math.random() > 0.5) {
-            this.game = new Game(
-                new MinimaxEngine(depth),
-                new QLearningEngine()
-                //new NetworkEngine()
-            );
+            this.game = new Game(a, b);
         } else {
-            this.game = new Game(
-                //new NetworkEngine(),
-                new QLearningEngine(),
-                new MinimaxEngine(depth)
-            );
+            this.game = new Game(b, a);
         }
     }
 
     // loop to the end of game, after restart game
     play() {
+        let trains = [];
         do {
             if (this.game.move() === null) {
                 continue; // is not finished game, just return
             }
-            this.addStats(this.game);
+            trains.push([[...this.game.fields], [...this.game.hist]]);
+            this.#addStats(this.game);
             this.#restart();
-            (new NetworkEngine).train([this.game.fields, this.game.hist]);
             this.maxGames--;
         } while (this.maxGames > 0);
+        (new NetworkEngine).train(trains);
         this.printStats();
+        setTimeout(() => {
+            this.stats = this.#resetStats();
+            this.maxGames = 1000;
+            this.play();
+        }, 2000);
     }
 
     animate(time) {
@@ -52,7 +61,11 @@ class Main {
         requestAnimationFrame(this.animate.bind(this));
     }
 
-    addStats(game) {
+    #resetStats() {
+        return {'game':{}, 'won': {}, 'draw': {}, 'lost': {}, 'won-X': {}, 'lost-X': {}, 'won-0': {}, 'lost-0': {}};
+    }
+
+    #addStats(game) {
         let incStats = (index, who) => {
             this.stats[index] = index in this.stats ? this.stats[index] : {};
             this.stats[index][who] = who in this.stats[index] ? this.stats[index][who] : 0;
@@ -63,6 +76,9 @@ class Main {
         const wlost = status == 1 ? '0' : 'X';
         const win = status == 1 ? game.engineX : game.engineO;
         const lost = status == 1 ? game.engineO : game.engineX;
+
+        incStats('game', win.code);
+        incStats('game', lost.code);
 
         if (status != 0) {
             incStats('won', win.code);
