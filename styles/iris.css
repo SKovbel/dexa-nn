@@ -1,0 +1,12 @@
+#content {
+    margin: 0;
+    float: left;
+}
+
+#network-canvas {
+    width: 50%;
+    height: 100vh;
+    border: 1px solid blue;
+    background: black;
+    float: right;
+}

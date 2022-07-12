@@ -7,7 +7,7 @@ class NetworkEngine extends GameEngine {
             this.nn = NeuralNetworkTools.import(loaded);
         } else {
             this.nn = new NeuralNetwork([
-                {size: 9, activation: NeuralNetworkActivation.SIGMOID},
+                {size: 9, activation: NeuralNetworkActivation.RELU},
                 {size: 9, activation: NeuralNetworkActivation.SIGMOID},
                 {size: 9}
             ]);
@@ -27,31 +27,28 @@ class NetworkEngine extends GameEngine {
         return bestMove;
     }
 
-    train(data) {
+    train(data, rate, maxEpoch = 1000) {
         const K = 0.9
         const WIN = 1;
         const DRW = 0;
         const LST = -1;
 
-        let sameGames = {};
-        for (let d = 0; d < data.length - 1; d++) {
-            let fields = data[d][0];
-            let histories = data[d][1];
+        // unique games only
+        /*let uniq = {};
+        for (let item of data) {
+            uniq[String(item[0]) + String(item[1])] = item;
+        }
+        var data = Object.keys(uniq).map((key) => [Number(key), uniq[key]]);*/
 
-            // unique games only
-            let key = String(fields) + String(histories);
-            if (key in sameGames) {
-                continue;
-            }
-            sameGames[key] = 1;
+        const policyNN = NeuralNetworkTools.clone(this.nn);
+        for (let item of data) {
+            let [fields, histories] = item;
 
             let status = GameStatus.status(fields);
-
             let rewardA = Math.abs(status) != 0 ? WIN : DRW; // last move win (if game status = -1 || 1) or draw (if 0). Last move can be as X as O
             let rewardB = Math.abs(status) != 0 ? LST : DRW; // prev move lost (if game status = -1 || 1) or draw
 
             let trains = [];
-            const policyNN = NeuralNetworkTools.clone(this.nn);
             for (let i = histories.length - 1, p = true; i >= 0; i--, p = !p) {
                 let outputs = NeuralNetwork.feedforward(policyNN, [...fields]);
                 const gameValue = outputs[histories[i]]; //?
@@ -66,7 +63,7 @@ class NetworkEngine extends GameEngine {
                 trains.push({'inputs': [...fields], 'outputs': [...outputs]});
                 fields[histories[i]] = 0;
             }
-            NeuralNetworkBackPropagation.train(this.nn, NeuralNetworkBackPropagation.SGD, trains, 0.00001, 0.1, 10000000000);
+            NeuralNetworkBackPropagation.train(this.nn, NeuralNetworkBackPropagation.SGD, trains, rate, 0.1, maxEpoch);
             this.save(NeuralNetworkTools.export(this.nn));
         }
 

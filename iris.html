@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<head>
+    <title>IRIS</title>
+    <link rel="stylesheet" href="styles/iris.css">
+    <script src="libs/network/network.js"></script>
+    <script src="libs/network/backpropagation.js"></script>
+    <script src="libs/network/visualizer.js"></script>
+    <script src="iris/iris.js"></script>
+    <script src="iris/main.js"></script>
+</head>
+    
+<body>
+    <pre id="content"></pre>
+    <canvas id="network-canvas"></canvas>
+    <button id="restart" onclick="restart();">Restart</button>
+    <script>
+        function restart() {
+            const content = document.getElementById('content');
+            const visual = document.getElementById('network-canvas');
+            const button = document.getElementById('restart');
+
+            const nn = new Main(content, visual);
+
+            content.innerHTML = '';
+            button.disabled = true;
+            nn.train();
+            nn.test();
+            nn.animate();
+            button.disabled = false;
+        }
+        restart();
+    </script>
+</body>

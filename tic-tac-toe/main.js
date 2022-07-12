@@ -1,15 +1,14 @@
 class Main {
     constructor(statsElement, boardCanvas, networkCanvas) {
-        this.stats = this.#resetStats();
         this.statsElement = statsElement;
+        this.boardCanvas = boardCanvas;
         this.networkCanvas = networkCanvas;
+        //this.boardCtx = this.boardCanvas.getContext('2d');
         this.networkCtx = this.networkCanvas.getContext('2d');
         this.networkCanvas.width = 500;
+        //this.board = new Board(this.boardCtx);
 
-        this.maxGames = 1000;
-        this.batchTrains = [];
-        this.board = new Board(this.boardCtx);
-
+        this.#resetStats();
         this.#restart();
     }
 
@@ -35,23 +34,22 @@ class Main {
 
     // loop to the end of game, after restart game
     play() {
-        let trains = [];
+        this.#resetStats();
+        let maxGames = 100;
         do {
             if (this.game.move() === null) {
                 continue; // is not finished game, just return
             }
-            trains.push([[...this.game.fields], [...this.game.hist]]);
+            for (let i = 0; i < 5; i++) {
+                (new NetworkEngine).train([[[...this.game.fields], [...this.game.hist]]] , 0.0001, 1000);
+            }
+            maxGames--;
             this.#addStats(this.game);
             this.#restart();
-            this.maxGames--;
-        } while (this.maxGames > 0);
-        (new NetworkEngine).train(trains);
-        this.printStats();
-        setTimeout(() => {
-            this.stats = this.#resetStats();
-            this.maxGames = 1000;
-            this.play();
-        }, 2000);
+        } while (maxGames > 0);
+        this.#printStats();
+
+        setTimeout(() => this.play(), 2000);
     }
 
     animate(time) {
@@ -62,7 +60,7 @@ class Main {
     }
 
     #resetStats() {
-        return {'game':{}, 'won': {}, 'draw': {}, 'lost': {}, 'won-X': {}, 'lost-X': {}, 'won-0': {}, 'lost-0': {}};
+        this.stats = {'game':{}, 'won': {}, 'draw': {}, 'lost': {}, 'won-X': {}, 'lost-X': {}, 'won-0': {}, 'lost-0': {}};
     }
 
     #addStats(game) {
@@ -90,7 +88,7 @@ class Main {
         }
     }
 
-    printStats() {
+    #printStats() {
         let line = "".padStart(10);
         let keys2 = {};
         for (const key in this.stats) {
@@ -112,5 +110,14 @@ class Main {
         const msg = document.createElement('p');
         msg.innerText = line;
         this.statsElement.append(msg);
+    }
+
+    dev() {
+        do {
+            if (this.game.move() === null) {
+                continue; // is not finished game, just return
+            }
+            (new NetworkEngine).train([[[...this.game.fields], [...this.game.hist]]], 0.01, 100000000);
+        } while (true);
     }
 }

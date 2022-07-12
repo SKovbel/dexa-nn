@@ -31,18 +31,18 @@
     </div>
 
     <script>
-        if (getGetParam('test')) {
-            const test = new Test();
-            test.run();
-        }
-
         const main = new Main(
             document.getElementById('stats'),
             document.getElementById('board-canvas'),
             document.getElementById('network-canvas')
         );
-        //main.animate();
-        main.play();
+
+        if (getGetParam('test')) {
+            main.dev();
+        } else {
+            //main.animate();
+            main.play();
+        }
 
 
         function save() {

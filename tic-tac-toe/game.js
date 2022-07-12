@@ -9,7 +9,7 @@ class Game {
     game() {
         this.hist = [];
         /* X=1, empty=0, 0=-1  */
-        this.fields = new Array(9).fill(0);
+        this.fields = [0, 0, 0, 0, 0, 0, 0, 0, 0];
         this.engineX.start(this); // says engine about start game
         this.engineO.start(this);
     }
@@ -29,8 +29,6 @@ class Game {
         if (status == null) { // game is not finished
             const turn = this.turn();
             const bestMove = (turn == 1) ? this.engineX.move(this) : this.engineO.move(this);
-            if (bestMove < -10)
-                console.log(bestMove + (turn == 1 ? this.engineX.code : this.engineO.code));
             this.hist.push(bestMove);
             this.fields[bestMove] = turn;
 

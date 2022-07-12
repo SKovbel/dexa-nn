@@ -44,41 +44,43 @@ class NeuralNetworkBackPropagationSGD {
         const first = layers[0];
         const last = layers[lastIdx];
 
-        let errorTotal = 0;
+        let totalError = 0;
+        let errorLayer = [];
+        let errorLayers = [layers.length];
 
-        // prepare last layer
-        let errors = [];
+        // output layer
         for (let j = 0; j < last.outputs.length; j++) {
-            errors[j] = last.outputs[j] - outputs[j];
-            errorTotal += errors[j] * errors[j];
+            errorLayer[j] = last.outputs[j] - outputs[j];
+            totalError += errorLayer[j] * errorLayer[j];
         }
-        last.derivateFunction(last.outputs, errors); // set last.errors
+        errorLayers[layers.length-1] = last.derivateFunction(last.outputs, errorLayer);
 
-        // hidden    layers
+        // hidden layers
         for (let l = layers.length - 1; l > 0; l--) {
             for (let j = 0; j < layers[l].outputs.length; j++) {
-                layers[l].biases[j] -= rate * layers[l].errors[j];
+                layers[l].biases[j] -= rate * errorLayers[l][j];
             }
             for (let i = 0; i < layers[l].inputs.length; i++) {
-                errors[i] = 0;
+                errorLayer[i] = 0;
                 for (let j = 0; j < layers[l].outputs.length; j++) {
-                    errors[i] += layers[l].weights[i][j] * layers[l].errors[j];
-                    layers[l].weights[i][j] -= rate * layers[l].inputs[i] * layers[l].errors[j];
+                    errorLayer[i] += layers[l].weights[i][j] * errorLayers[l][j];
+                    layers[l].weights[i][j] -= rate * layers[l].inputs[i] * errorLayers[l][j];
                 }
             }
-            layers[l-1].derivateFunction(layers[l].inputs, errors); // set layer[i-1].errors
+            errorLayers[l-1] = layers[l-1].derivateFunction(layers[l].inputs, errorLayer);
         }
 
         // execute first layer
         for (let j = 0; j < first.outputs.length; j++) {
-            first.biases[j] -= rate * first.errors[j];
+            first.biases[j] -= rate * errorLayers[0][j];
             for (let i = 0; i < first.inputs.length; i++) {
-                first.weights[i][j] -= rate * first.inputs[i] * first.errors[j];
+                first.weights[i][j] -= rate * first.inputs[i] * errorLayers[0][j];
             }
         }
 
-        //console.log(JSON.stringify(network));
-        return errorTotal;
+
+
+            return totalError;
     }
 }
 
@@ -101,31 +103,38 @@ class NeuralNetworkBackDerivate {
     }
 
     static tanh(inputs, errors) {
+        let result = [];
         for (let i = 0; i < inputs.length; i++) {
             let tanh = Math.tanh(inputs[i]);
             const deriviate  = 1 - tanh * tanh;
-            this.errors[i] = errors[i] * deriviate;
+            result[i] = errors[i] * deriviate;
         }
+        return result;
     }
 
     static relu(inputs, errors) {
+        let result = [];
         for (let i = 0; i < inputs.length; i++) {
-            const deriviate = inputs[i] > 0 ? 1 : 0.001 * inputs[i];
-            this.errors[i] = errors[i] * deriviate;
+            const deriviate = inputs[i] > 0 ? 1 : -0 * inputs[i];
+            result[i] = errors[i] * deriviate;
         }
+        return result;
     }
 
     static sigmoid(inputs, errors) {
+        let result = [];
         for (let i = 0; i < inputs.length; i++) {
             const deriviate = inputs[i] * (1 - inputs[i]);
-            this.errors[i] = errors[i] * deriviate;
+            result[i] = errors[i] * deriviate;
         }
+        return result;
     }
 
     static softmax(inputs, errors) {
+        let x = [];
         let exp = [];
         let sum = 0;
-        let x = [];
+        let result = [];
 
         // activation
         for (let i = 0; i < inputs.length; i++) {this
@@ -139,14 +148,15 @@ class NeuralNetworkBackDerivate {
 
         // deriviation
         for (let i = 0; i < inputs.length; i++) {
-            this.errors[i] = 0;
+            result[i] = 0;
             for (let j = 0; j < inputs.length; j++) {
                 if (i == j) {
-                    this.errors[i] += x[i] * errors[i] * (1 - x[j]);
+                    result[i] += x[i] * errors[i] * (1 - x[j]);
                 } else {
-                    this.errors[i] += x[i] * errors[j] * (0 - x[j]);
+                    result[i] += x[i] * errors[j] * (0 - x[j]);
                 }
             }
         }
+        return result;
     }
 }
