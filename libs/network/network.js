@@ -31,7 +31,7 @@ class NeuralNetworkLayer {
             this.weights[j] = new Array(outputCount);
         }
         NeuralNetworkLayer.init(this);
-        NeuralNetworkLayer.#randomize(this);
+        NeuralNetworkLayer.randomize(this);
     }
 
     // public init, used in load
@@ -41,7 +41,7 @@ class NeuralNetworkLayer {
         NeuralNetworkActivation.init(layer);
     }
 
-    static #randomize(layer) {
+    static randomize(layer) {
         for (let j = 0; j < layer.biases.length; j++) {
             for (let i = 0; i < layer.weights.length; i++) {
                 layer.weights[i][j] = Math.random() * 2 - 1;
