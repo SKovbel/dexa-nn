@@ -5,6 +5,7 @@
     npm install grunt-contrib-watch
     npm install grunt-contrib-uglify
 
+    ./node_modules/grunt/bin/grunt concat
     ./node_modules/grunt/bin/grunt watch
  */
 
@@ -32,14 +33,8 @@ module.exports = function(grunt){
                 atBegin: true,
                 event: ['all']
             },
-            src: {
-                src: "dexa.min.js",
-                tasks: ['concat']
-            },
-            dist: {
-                dest: "dexa.min.js"
-                //tasks: ['uglify']
-            },
+            files: ['**/*'],
+            tasks: ['concat'],
           }
     });
 
