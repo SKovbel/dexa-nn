@@ -346,7 +346,7 @@ class NeuralNetworkActivation {
         }
     }
 }
-;class NeuralNetworkTools {
+;class NeuralNetworkTool {
     /**
      * @param json|object data
      * @param int mutation 
@@ -357,7 +357,7 @@ class NeuralNetworkActivation {
         for (let l = 0; l < network.layers.length; l++) {
             NeuralNetworkLayer.init(network.layers[l]);
         }
-        NeuralNetworkTools.mutate(network, mutation);
+        NeuralNetworkTool.mutate(network, mutation);
         return network;
     }
 
@@ -388,7 +388,7 @@ class NeuralNetworkActivation {
             newLayers.push({'activation': layer.activation, 'weights': newWeights, 'biases': newBiases});
         }
         const newNetwork = {'layers': newLayers};
-        return NeuralNetworkTools.import(newNetwork, mutation);
+        return NeuralNetworkTool.import(newNetwork, mutation);
     }
 
     static mutate(network, mutation = 0) {

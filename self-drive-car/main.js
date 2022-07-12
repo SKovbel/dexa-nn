@@ -61,7 +61,7 @@ class Main {
 
     save() {
         console.log('Saved');
-        const jsonData = NeuralNetworkTools.export(this.bestCar.nn);
+        const jsonData = NeuralNetworkTool.export(this.bestCar.nn);
         localStorage.setItem(Main.nnName, jsonData);
     }
 
@@ -69,7 +69,7 @@ class Main {
         const data = localStorage.getItem(Main.nnName);
         if (data) {
             for (let i = 0; i < this.cars.length; i++) {
-                this.cars[i].nn = NeuralNetworkTools.import(data, i == 0 ? 0 : this.mutationAmount);
+                this.cars[i].nn = NeuralNetworkTool.import(data, i == 0 ? 0 : this.mutationAmount);
             }
         }
     }

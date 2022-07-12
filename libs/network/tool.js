@@ -1,4 +1,4 @@
-class NeuralNetworkTools {
+class NeuralNetworkTool {
     /**
      * @param json|object data
      * @param int mutation 
@@ -9,7 +9,7 @@ class NeuralNetworkTools {
         for (let l = 0; l < network.layers.length; l++) {
             NeuralNetworkLayer.init(network.layers[l]);
         }
-        NeuralNetworkTools.mutate(network, mutation);
+        NeuralNetworkTool.mutate(network, mutation);
         return network;
     }
 
@@ -40,7 +40,7 @@ class NeuralNetworkTools {
             newLayers.push({'activation': layer.activation, 'weights': newWeights, 'biases': newBiases});
         }
         const newNetwork = {'layers': newLayers};
-        return NeuralNetworkTools.import(newNetwork, mutation);
+        return NeuralNetworkTool.import(newNetwork, mutation);
     }
 
     static mutate(network, mutation = 0) {

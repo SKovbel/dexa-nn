@@ -4,7 +4,7 @@ class NetworkEngine extends GameEngine {
         this.code = 'network';
         const loaded = this.load(null);
         if (loaded) {
-            this.nn = NeuralNetworkTools.import(loaded);
+            this.nn = NeuralNetworkTool.import(loaded);
         } else {
             this.nn = new NeuralNetwork([
                 {size: 9, activation: NeuralNetworkActivation.RELU},
@@ -40,7 +40,7 @@ class NetworkEngine extends GameEngine {
         }
         var data = Object.keys(uniq).map((key) => [Number(key), uniq[key]]);*/
 
-        const policyNN = NeuralNetworkTools.clone(this.nn);
+        const policyNN = NeuralNetworkTool.clone(this.nn);
         for (let item of data) {
             let [fields, histories] = item;
 
@@ -64,14 +64,14 @@ class NetworkEngine extends GameEngine {
                 fields[histories[i]] = 0;
             }
             NeuralNetworkBackPropagation.train(this.nn, NeuralNetworkBackPropagation.SGD, trains, rate, 0.1, maxEpoch);
-            this.save(NeuralNetworkTools.export(this.nn));
+            this.save(NeuralNetworkTool.export(this.nn));
         }
 
 
         return
         const trainData = Object.keys(trains).map((k) => trains[k]);
         NeuralNetworkBackPropagation.train(this.nn, NeuralNetworkBackPropagation.SGD, trainData, 0.01, 0.1, 10000);
-        this.save(NeuralNetworkTools.export(this.nn));
+        this.save(NeuralNetworkTool.export(this.nn));
 
         return;
         while (trainData.length > 0) {
