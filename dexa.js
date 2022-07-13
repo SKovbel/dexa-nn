@@ -161,7 +161,10 @@ class NeuralNetworkBackPropagationAdam {
     static train(network, trains, rate = 0.01, error = 0.1, epoch = 1000) {
         
     }
-};
+}
+
+https://github.com/Artelnics/opennn/blob/master/opennn/adaptive_moment_estimation.cpp
+https://github.com/Artelnics/opennn/blob/master/opennn/gradient_descent.cpp;
 class NeuralNetworkBackPropagationSGD {
     static train(network, trains, rate = 0.01, error = 0.1, epoch = 1000) {
         let e = 0;
@@ -358,7 +361,7 @@ class NeuralNetworkActivation {
             NeuralNetworkLayer.init(network.layers[l]);
         }
         NeuralNetworkTool.mutate(network, mutation);
-        return network;
+        return netwok;
     }
 
     static export(network) {
@@ -449,7 +452,7 @@ class NeuralNetworkActivation {
         ctx.fillText(activation, left - 10, bottom - 30);
 
         for (let i = 0; i < inputs.length; i++) {
-            const x = NeuralNetworkVisualizer.#lerp(inputs, i, left, right);
+            const x = NeuralNetworkVisualizer.lerp(inputs, i, left, right);
 
             ctx.beginPath();
             ctx.arc(x, bottom, nodeRadius, 0, 2*Math.PI);

@@ -44,7 +44,7 @@ class NeuralNetworkVisualizer {
         ctx.fillText(activation, left - 10, bottom - 30);
 
         for (let i = 0; i < inputs.length; i++) {
-            const x = NeuralNetworkVisualizer.#lerp(inputs, i, left, right);
+            const x = NeuralNetworkVisualizer.lerp(inputs, i, left, right);
 
             ctx.beginPath();
             ctx.arc(x, bottom, nodeRadius, 0, 2*Math.PI);

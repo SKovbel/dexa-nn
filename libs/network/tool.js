@@ -10,7 +10,7 @@ class NeuralNetworkTool {
             NeuralNetworkLayer.init(network.layers[l]);
         }
         NeuralNetworkTool.mutate(network, mutation);
-        return network;
+        return netwok;
     }
 
     static export(network) {
