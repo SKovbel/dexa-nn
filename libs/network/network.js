@@ -10,7 +10,7 @@ class NeuralNetwork {
         }
     }
 
-    static feedforward(network, inputs) {
+    static forwardPropagate(network, inputs) {
         network.layers[0].inputs = inputs;
         network.layers[0].activationFunction();
         for (let l = 1; l < network.layers.length; l++) {

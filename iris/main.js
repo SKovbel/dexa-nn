@@ -20,7 +20,7 @@ class Main {
     test() {
         const trains = simpleData.data.sort((x, y) => x.train - y.train);
         for (let t = 0; t < trains.length; t++) {
-            let result = NeuralNetwork.feedforward(this.network, trains[t].inputs);
+            let result = NeuralNetwork.forwardPropagate(this.network, trains[t].inputs);
             let result1 = [];
             let result2 = [];
             for (let i = 0; i < result.length; i++) {

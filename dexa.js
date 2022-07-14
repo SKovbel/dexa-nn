@@ -60,6 +60,34 @@ function polysIntersect(poly1, poly2) {
         }
     }
 
+    static backPropagate(network, outputs) {
+        const layers = network.layers;
+        const last = layers[layers.length - 1];
+
+        let totalError = 0;
+        let errors = [];
+
+        // output layer
+        for (let j = 0; j < last.outputs.length; j++) {
+            errors[j] = last.outputs[j] - outputs[j];
+            totalError += errors[j] * errors[j];
+        }
+        last.errors = last.derivateFunction(last.outputs, errors);
+
+        // hidden layers
+        for (let l = layers.length - 1; l > 0; l--) {
+            errors = [];
+            for (let i = 0; i < layers[l].inputs.length; i++) {
+                errors[i] = 0;
+                for (let j = 0; j < layers[l].outputs.length; j++) {
+                    errors[i] += layers[l].weights[i][j] * layers[l].errors[j];
+                }
+            }
+            layers[l-1].errors = layers[l-1].derivateFunction(layers[l].inputs, errors);
+        }
+        return totalError;
+    }
+
     static train(network, algorithm, trains, rate = 0.01, error = 0.1, epoch = 1000) {
         const t0 = performance.now();
         NeuralNetworkBackPropagation.init(network);
@@ -159,65 +187,78 @@ class NeuralNetworkDerivate {
 ;
 class NeuralNetworkBackPropagationAdam {
     static train(network, trains, rate = 0.01, error = 0.1, epoch = 1000) {
-        
+        const layers = network.layers;
+
+        const beta1 = 0.001;
+        const beta2 = 0.001;
+
+        for (let l = 0; l < layers.length; l++) {
+            let layer = layers[l];
+            layer.adamWM = [];
+            layer.adamWV = [];
+            layer.adamBM = [];
+            layer.adamBV = [];
+        }
+
+        do {
+            for (let t = 0; t < trains.length; t++) {
+                NeuralNetwork.forwardPropagate(network, trains[t].inputs);
+                const totalError = NeuralNetworkBackPropagation.backPropagate(network, trains[t].outputs);
+
+                for (let l = 0; l < layers.length; l++) {
+                    let layer = layers[l];
+                    for (let i = 0; i < layer.width * layer.prevWidth; i++) {
+                        layer.adamWM[i] = beta1 * layer.adamWM[i] + (1.0 - beta1) * layer.dW[i];
+                        layer.adamWV[i] = beta2 * layer.adamWV[i] + (1.0 - beta2) * layer.dW[i] * layer.dW[i];
+                        let m = layer.adamWM[i] / (1 - beta1);
+                        let v = layer.adamWV[i] / (1 - beta2);
+                        layer.W[i] = layer.W[i] - rate * m / (sqrt(v) + 1e-8);
+                        layer.dW[i] = 0;
+                    }
+
+                    for (let i = 0; i < layer.width; i++) {
+                        layer.adamBM[i] = beta1 * layer.adamBM[i] + (1.0 - beta1) * layer.dB[i];
+                        layer.adamBV[i] = beta2 * layer.adamBV[i] + (1.0 - beta2) * layer.dB[i] * layer.dB[i];
+                        let m = layer.adamBM[i] / (1 - beta1);
+                        let v = layer.adamBV[i] / (1 - beta2);
+                        layer.B[i] = layer.B[i] - rate * m / (sqrt(v) + 1e-8);
+                        layer.dB[i] = 0;
+                    }
+                }
+            }
+            e++;
+        } while (totalError > error && e < epoch)
     }
 }
-
-https://github.com/Artelnics/opennn/blob/master/opennn/adaptive_moment_estimation.cpp
-https://github.com/Artelnics/opennn/blob/master/opennn/gradient_descent.cpp;
+;
 class NeuralNetworkBackPropagationSGD {
-    static train(network, trains, rate = 0.01, error = 0.1, epoch = 1000) {
-        let e = 0;
+    static train(network, trains, rate = 0.01, error = 0.1, maxEpoch = 1000) {
+        let epoch = 0;
         let totalError  = 0;
         do {
             totalError  = 0;
             for (let t = 0; t < trains.length; t++) {
-                NeuralNetwork.feedforward(network, trains[t].inputs);
-                totalError += this.backpPropagation(network, trains[t].outputs, rate);
+                totalError += 
+                    NeuralNetworkBackPropagationSGD.#trainEpoch(network, trains[t].inputs, trains[t].outputs, rate);
             }
-            e++;
-            if (e % 10000 == 0) console.log('Epoch: ' + e + '; ' + 'Error: ' + totalError + '; ');
-        } while (totalError > error && e < epoch)
+            if (epoch % 10000 == 0) console.log('Epoch: ' + epoch + '; ' + 'Total Error: ' + totalError + '; ');
+        } while (totalError > error && ++epoch < maxEpoch)
         return totalError;
     }
 
-    static backpPropagation(network, outputs, rate) {
+    static #trainEpoch(network, inputs, outputs, rate) {
         const layers = network.layers;
-        const lastIdx = layers.length - 1;
-        const first = layers[0];
-        const last = layers[lastIdx];
 
-        let totalError = 0;
-        let errorLayer = [];
-        let errorLayers = [layers.length];
-
-        // output layer
-        for (let j = 0; j < last.outputs.length; j++) {
-            errorLayer[j] = last.outputs[j] - outputs[j];
-            totalError += errorLayer[j] * errorLayer[j];
-        }
-        errorLayers[layers.length-1] = last.derivateFunction(last.outputs, errorLayer);
+        NeuralNetwork.forwardPropagate(network, inputs);
+        const totalError = NeuralNetworkBackPropagation.backPropagate(network, outputs);
 
         // hidden layers
-        for (let l = layers.length - 1; l > 0; l--) {
+        for (let l = layers.length - 1; l >= 0; l--) {
             for (let j = 0; j < layers[l].outputs.length; j++) {
-                layers[l].biases[j] -= rate * errorLayers[l][j];
-            }
-            for (let i = 0; i < layers[l].inputs.length; i++) {
-                errorLayer[i] = 0;
-                for (let j = 0; j < layers[l].outputs.length; j++) {
-                    errorLayer[i] += layers[l].weights[i][j] * errorLayers[l][j];
-                    layers[l].weights[i][j] -= rate * layers[l].inputs[i] * errorLayers[l][j];
+                layers[l].biases[j] -= rate * layers[l].errors[j];
+                for (let i = 0; i < layers[l].inputs.length; i++) {
+                    layers[l].weights[i][j] -= rate * layers[l].inputs[i] * layers[l].errors[j];
                 }
-            }
-            errorLayers[l-1] = layers[l-1].derivateFunction(layers[l].inputs, errorLayer);
-        }
-
-        // execute first layer
-        for (let j = 0; j < first.outputs.length; j++) {
-            first.biases[j] -= rate * errorLayers[0][j];
-            for (let i = 0; i < first.inputs.length; i++) {
-                first.weights[i][j] -= rate * first.inputs[i] * errorLayers[0][j];
             }
         }
 
@@ -236,7 +277,7 @@ class NeuralNetworkBackPropagationSGD {
         }
     }
 
-    static feedforward(network, inputs) {
+    static forwardPropagate(network, inputs) {
         network.layers[0].inputs = inputs;
         network.layers[0].activationFunction();
         for (let l = 1; l < network.layers.length; l++) {

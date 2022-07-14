@@ -38,7 +38,7 @@ class Main {
 
     test() {
         for (let t = 0; t < this.trains.length; t++) {
-            const result = NeuralNetwork.feedforward(this.network, this.trains[t].inputs);
+            const result = NeuralNetwork.forwardPropagate(this.network, this.trains[t].inputs);
             let ins = '';
             for (let i = 0; i < this.trains[t].inputs.length; i++) {
                 ins += this.trains[t].inputs[i] + ' ';

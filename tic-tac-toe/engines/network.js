@@ -17,7 +17,7 @@ class NetworkEngine extends GameEngine {
     move(game) {
         let maxMove = -Infinity;
         let bestMove = null;
-        const outputs = NeuralNetwork.feedforward(this.nn, [...game.fields]);
+        const outputs = NeuralNetwork.forwardPropagate(this.nn, [...game.fields]);
         for (let i = 0; i < outputs.length; i++) {
             if (outputs[i] > maxMove && game.fields[i] == 0) {
                 bestMove = i;
@@ -50,7 +50,7 @@ class NetworkEngine extends GameEngine {
 
             let trains = [];
             for (let i = histories.length - 1, p = true; i >= 0; i--, p = !p) {
-                let outputs = NeuralNetwork.feedforward(policyNN, [...fields]);
+                let outputs = NeuralNetwork.forwardPropagate(policyNN, [...fields]);
                 const gameValue = outputs[histories[i]]; //?
                 if (p) { // calculates players X and O separatly
                     outputs[histories[i]] = rewardA;
