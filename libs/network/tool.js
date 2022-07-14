@@ -1,16 +1,11 @@
 class NeuralNetworkTool {
-    /**
-     * @param json|object data
-     * @param int mutation 
-     * @returns 
-     */
     static import(data, mutation = 0) {
         const network = (typeof data === 'string') ? JSON.parse(data) : data;
         for (let l = 0; l < network.layers.length; l++) {
             NeuralNetworkLayer.init(network.layers[l]);
         }
         NeuralNetworkTool.mutate(network, mutation);
-        return netwok;
+        return network;
     }
 
     static export(network) {
@@ -48,10 +43,14 @@ class NeuralNetworkTool {
             const layer = network.layers[l];
             for (let j = 0; j < layer.outputs.length; j++) {
                 for (let i = 0; i < layer.inputs.length; i++) {
-                    layer.weights[i][j] = lerp(layer.weights[i][j], 2*Math.random() - 1, mutation);
+                    layer.weights[i][j] = this.#lerp(layer.weights[i][j], 2*Math.random() - 1, mutation);
                 }
-                layer.biases[j] = lerp(layer.biases[j], 2*Math.random() - 1, mutation);
+                layer.biases[j] = this.#lerp(layer.biases[j], 2 * Math.random() - 1, mutation);
             }
         }
+    }
+
+    static #lerp(A, B, t) {
+        return A + t*(B - A);
     }
 }

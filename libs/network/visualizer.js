@@ -9,7 +9,7 @@ class NeuralNetworkVisualizer {
         const layerHeight = height/network.layers.length;
 
         for (let i = network.layers.length - 1; i >= 0; i--) {
-            const layerTop = top + NeuralNetworkVisualizer.lerp(network.layers, i, height-layerHeight, 0);
+            const layerTop = top + NeuralNetworkVisualizer.#lerp(network.layers, i, height-layerHeight, 0);
             NeuralNetworkVisualizer.drawLayer(
                 ctx,
                 network.layers[i],
@@ -30,8 +30,8 @@ class NeuralNetworkVisualizer {
         for (let i = 0; i < inputs.length; i++) {
             for (let j = 0; j < outputs.length; j++) {
                 ctx.beginPath();
-                ctx.moveTo(NeuralNetworkVisualizer.lerp(inputs, i, left, right), bottom);
-                ctx.lineTo(NeuralNetworkVisualizer.lerp(outputs, j, left, right), top)
+                ctx.moveTo(NeuralNetworkVisualizer.#lerp(inputs, i, left, right), bottom);
+                ctx.lineTo(NeuralNetworkVisualizer.#lerp(outputs, j, left, right), top)
                 ctx.lineWidth = 2;
                 ctx.strokeStyle = this.getRGBA(weights[i][j]);
                 ctx.stroke();
@@ -44,7 +44,7 @@ class NeuralNetworkVisualizer {
         ctx.fillText(activation, left - 10, bottom - 30);
 
         for (let i = 0; i < inputs.length; i++) {
-            const x = NeuralNetworkVisualizer.lerp(inputs, i, left, right);
+            const x = NeuralNetworkVisualizer.#lerp(inputs, i, left, right);
 
             ctx.beginPath();
             ctx.arc(x, bottom, nodeRadius, 0, 2*Math.PI);
@@ -58,7 +58,7 @@ class NeuralNetworkVisualizer {
         }
 
         for (let i = 0; i < outputs.length; i++) {
-            const x = NeuralNetworkVisualizer.lerp(outputs, i, left, right);
+            const x = NeuralNetworkVisualizer.#lerp(outputs, i, left, right);
 
             ctx.beginPath();
             ctx.arc(x, top, nodeRadius, 0, 2*Math.PI);
@@ -92,7 +92,7 @@ class NeuralNetworkVisualizer {
         }
     }
 
-    static #erp(nodes, index, A, B) {
+    static #lerp(nodes, index, A, B) {
         const t = nodes.length == 1 ? 0.5 : index / (nodes.length - 1);
         return A + t*(B - A);
     }

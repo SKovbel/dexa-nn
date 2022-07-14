@@ -184,6 +184,58 @@ function polysIntersect(poly1, poly2) {
         return result;
     }
 }
+;class NeuralNetwork {
+    constructor(layersConfig) {
+        this.layers = [];
+        for (let l = 0; l < layersConfig.length - 1; l++) {
+            this.layers.push(new NeuralNetworkLayer(
+                layersConfig[l].size, 
+                layersConfig[l + 1].size,
+                layersConfig[l].activation
+            ));
+        }
+    }
+
+    static forwardPropagate(network, inputs) {
+        network.layers[0].inputs = inputs;
+        network.layers[0].activationFunction();
+        for (let l = 1; l < network.layers.length; l++) {
+            network.layers[l].inputs = network.layers[l - 1].outputs;
+            network.layers[l].activationFunction();
+        }
+        return network.layers[network.layers.length - 1].outputs;
+    }
+}
+
+
+class NeuralNetworkLayer {
+    constructor(inputCount, outputCount, activation = NeuralNetworkActivation.RELU) {
+        this.activation = activation;
+        this.biases = new Array(outputCount);
+        this.weights = new Array(inputCount);
+        for (let j = 0; j < inputCount; j++) {
+            this.weights[j] = new Array(outputCount);
+        }
+        NeuralNetworkLayer.init(this);
+        NeuralNetworkLayer.randomize(this);
+    }
+
+    // public init, used in load
+    static init(layer) {
+        layer.inputs = new Array(layer.weights.length);
+        layer.outputs = new Array(layer.biases.length);
+        NeuralNetworkActivation.init(layer);
+    }
+
+    static randomize(layer) {
+        for (let j = 0; j < layer.biases.length; j++) {
+            for (let i = 0; i < layer.weights.length; i++) {
+                layer.weights[i][j] = Math.random() * 2 - 1;
+            }
+            layer.biases[j] = Math.random() * 2 - 1;
+        }
+    }
+}
 ;;class NeuralNetworkBackPropagation {
     static SGD = 'sgd';
     static ADAM = 'adam';
@@ -311,71 +363,14 @@ class NeuralNetworkBackPropagationSGD {
         return error;
     }
 }
-;class NeuralNetwork {
-    constructor(layersConfig) {
-        this.layers = [];
-        for (let l = 0; l < layersConfig.length - 1; l++) {
-            this.layers.push(new NeuralNetworkLayer(
-                layersConfig[l].size, 
-                layersConfig[l + 1].size,
-                layersConfig[l].activation
-            ));
-        }
-    }
-
-    static forwardPropagate(network, inputs) {
-        network.layers[0].inputs = inputs;
-        network.layers[0].activationFunction();
-        for (let l = 1; l < network.layers.length; l++) {
-            network.layers[l].inputs = network.layers[l - 1].outputs;
-            network.layers[l].activationFunction();
-        }
-        return network.layers[network.layers.length - 1].outputs;
-    }
-}
-
-
-class NeuralNetworkLayer {
-    constructor(inputCount, outputCount, activation = NeuralNetworkActivation.RELU) {
-        this.activation = activation;
-        this.biases = new Array(outputCount);
-        this.weights = new Array(inputCount);
-        for (let j = 0; j < inputCount; j++) {
-            this.weights[j] = new Array(outputCount);
-        }
-        NeuralNetworkLayer.init(this);
-        NeuralNetworkLayer.randomize(this);
-    }
-
-    // public init, used in load
-    static init(layer) {
-        layer.inputs = new Array(layer.weights.length);
-        layer.outputs = new Array(layer.biases.length);
-        NeuralNetworkActivation.init(layer);
-    }
-
-    static randomize(layer) {
-        for (let j = 0; j < layer.biases.length; j++) {
-            for (let i = 0; i < layer.weights.length; i++) {
-                layer.weights[i][j] = Math.random() * 2 - 1;
-            }
-            layer.biases[j] = Math.random() * 2 - 1;
-        }
-    }
-}
 ;class NeuralNetworkTool {
-    /**
-     * @param json|object data
-     * @param int mutation 
-     * @returns 
-     */
     static import(data, mutation = 0) {
         const network = (typeof data === 'string') ? JSON.parse(data) : data;
         for (let l = 0; l < network.layers.length; l++) {
             NeuralNetworkLayer.init(network.layers[l]);
         }
         NeuralNetworkTool.mutate(network, mutation);
-        return netwok;
+        return network;
     }
 
     static export(network) {
@@ -413,11 +408,15 @@ class NeuralNetworkLayer {
             const layer = network.layers[l];
             for (let j = 0; j < layer.outputs.length; j++) {
                 for (let i = 0; i < layer.inputs.length; i++) {
-                    layer.weights[i][j] = lerp(layer.weights[i][j], 2*Math.random() - 1, mutation);
+                    layer.weights[i][j] = this.#lerp(layer.weights[i][j], 2*Math.random() - 1, mutation);
                 }
-                layer.biases[j] = lerp(layer.biases[j], 2*Math.random() - 1, mutation);
+                layer.biases[j] = this.#lerp(layer.biases[j], 2 * Math.random() - 1, mutation);
             }
         }
+    }
+
+    static #lerp(A, B, t) {
+        return A + t*(B - A);
     }
 }
 ;class NeuralNetworkVisualizer {
@@ -431,7 +430,7 @@ class NeuralNetworkLayer {
         const layerHeight = height/network.layers.length;
 
         for (let i = network.layers.length - 1; i >= 0; i--) {
-            const layerTop = top + NeuralNetworkVisualizer.lerp(network.layers, i, height-layerHeight, 0);
+            const layerTop = top + NeuralNetworkVisualizer.#lerp(network.layers, i, height-layerHeight, 0);
             NeuralNetworkVisualizer.drawLayer(
                 ctx,
                 network.layers[i],
@@ -452,8 +451,8 @@ class NeuralNetworkLayer {
         for (let i = 0; i < inputs.length; i++) {
             for (let j = 0; j < outputs.length; j++) {
                 ctx.beginPath();
-                ctx.moveTo(NeuralNetworkVisualizer.lerp(inputs, i, left, right), bottom);
-                ctx.lineTo(NeuralNetworkVisualizer.lerp(outputs, j, left, right), top)
+                ctx.moveTo(NeuralNetworkVisualizer.#lerp(inputs, i, left, right), bottom);
+                ctx.lineTo(NeuralNetworkVisualizer.#lerp(outputs, j, left, right), top)
                 ctx.lineWidth = 2;
                 ctx.strokeStyle = this.getRGBA(weights[i][j]);
                 ctx.stroke();
@@ -466,7 +465,7 @@ class NeuralNetworkLayer {
         ctx.fillText(activation, left - 10, bottom - 30);
 
         for (let i = 0; i < inputs.length; i++) {
-            const x = NeuralNetworkVisualizer.lerp(inputs, i, left, right);
+            const x = NeuralNetworkVisualizer.#lerp(inputs, i, left, right);
 
             ctx.beginPath();
             ctx.arc(x, bottom, nodeRadius, 0, 2*Math.PI);
@@ -480,7 +479,7 @@ class NeuralNetworkLayer {
         }
 
         for (let i = 0; i < outputs.length; i++) {
-            const x = NeuralNetworkVisualizer.lerp(outputs, i, left, right);
+            const x = NeuralNetworkVisualizer.#lerp(outputs, i, left, right);
 
             ctx.beginPath();
             ctx.arc(x, top, nodeRadius, 0, 2*Math.PI);
@@ -514,7 +513,7 @@ class NeuralNetworkLayer {
         }
     }
 
-    static #erp(nodes, index, A, B) {
+    static #lerp(nodes, index, A, B) {
         const t = nodes.length == 1 ? 0.5 : index / (nodes.length - 1);
         return A + t*(B - A);
     }
