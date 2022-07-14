@@ -49,84 +49,45 @@ function polysIntersect(poly1, poly2) {
     }
     return false;
 }
-;;;class NeuralNetworkBackPropagation {
-    static SGD = 'sgd';
-    static ADAM = 'adam';
+;;class NeuralNetworkActivation {
+    static RELU = 'relu';
+    static TANH = 'tanh';
+    static SIGMOID = 'sigmoid';
+    static SOFTMAX = 'softmax';
 
-    static init(network) {
-        for (let l = 0; l < network.layers.length; l++) {
-            network.layers[l].errors = [];
-            NeuralNetworkDerivate.init(network.layers[l]);
-        }
-    }
-
-    static backPropagate(network, outputs) {
-        const layers = network.layers;
-        const last = layers[layers.length - 1];
-
-        let totalError = 0;
-        let errors = [];
-
-        // output layer
-        for (let j = 0; j < last.outputs.length; j++) {
-            errors[j] = last.outputs[j] - outputs[j];
-            totalError += errors[j] * errors[j];
-        }
-        last.errors = last.derivateFunction(last.outputs, errors);
-
-        // hidden layers
-        for (let l = layers.length - 1; l > 0; l--) {
-            errors = [];
-            for (let i = 0; i < layers[l].inputs.length; i++) {
-                errors[i] = 0;
-                for (let j = 0; j < layers[l].outputs.length; j++) {
-                    errors[i] += layers[l].weights[i][j] * layers[l].errors[j];
-                }
-            }
-            layers[l-1].errors = layers[l-1].derivateFunction(layers[l].inputs, errors);
-        }
-        return totalError;
-    }
-
-    static train(network, algorithm, trains, rate = 0.01, error = 0.1, epoch = 1000) {
-        const t0 = performance.now();
-        NeuralNetworkBackPropagation.init(network);
-        let totalError  = 0;
-        switch(algorithm) {
-            case NeuralNetworkBackPropagation.ADAM:
-                totalError = NeuralNetworkBackPropagationAdam.train(network, trains, rate, error, epoch);
-                break;
-            case NeuralNetworkBackPropagation.SGD:
-            default:
-                totalError = NeuralNetworkBackPropagationSGD.train(network, trains, rate, error, epoch);
-                break;
-        }
-        const t1 = performance.now();
-        console.log('Time: ' + (Math.round((t1 - t0), 2) / 1000) + 's Error=' + totalError);
-        return totalError;
-    }
-}
-
-
-class NeuralNetworkDerivate {
     static init(layer) {
         switch (layer.activation) {
             case NeuralNetworkActivation.RELU:
-                layer.derivateFunction = NeuralNetworkDerivate.relu;
+                layer.activationFunction = this.relu;
+                layer.derivateFunction = this.drelu;
                 break;
             case NeuralNetworkActivation.TANH:
-                layer.derivateFunction = NeuralNetworkDerivate.tanh;
+                layer.activationFunction = this.tanh;
+                layer.derivateFunction = this.dtanh;
                 break;
             case NeuralNetworkActivation.SIGMOID:
-                layer.derivateFunction = NeuralNetworkDerivate.sigmoid;
+                layer.activationFunction = this.sigmoid;
+                layer.derivateFunction = this.dsigmoid;
                 break;
             case NeuralNetworkActivation.SOFTMAX:
-                layer.derivateFunction = NeuralNetworkDerivate.softmax;
+                layer.activationFunction = this.softmax;
+                layer.derivateFunction = this.dsoftmax;
                 break;
         }
     }
 
-    static tanh(inputs, errors) {
+    // TANH ----------------------------------
+
+    static tanh() { // -1..1
+        for (let i = 0; i < this.outputs.length; i++) {
+            let x = this.biases[i];
+            for (let j = 0; j < this.inputs.length; j++) {
+                x += this.inputs[j] * this.weights[j][i];
+            }
+            this.outputs[i] = Math.tanh(x);
+        }
+    }
+    static dtanh(inputs, errors) {
         let result = [];
         for (let i = 0; i < inputs.length; i++) {
             let tanh = Math.tanh(inputs[i]);
@@ -136,16 +97,18 @@ class NeuralNetworkDerivate {
         return result;
     }
 
-    static relu(inputs, errors) {
-        let result = [];
-        for (let i = 0; i < inputs.length; i++) {
-            const deriviate = inputs[i] > 0 ? 1 : -0 * inputs[i];
-            result[i] = errors[i] * deriviate;
-        }
-        return result;
-    }
+    // SIGMOID ------------------------------
 
-    static sigmoid(inputs, errors) {
+    static sigmoid() { // 0..1
+        for (let i = 0; i < this.outputs.length; i++) {
+            let x = this.biases[i];
+            for (let j = 0; j < this.inputs.length; j++) {
+                x += this.inputs[j] * this.weights[j][i];
+            }
+            this.outputs[i] = 1 / (1 + Math.exp(-x));
+        }
+    }
+    static dsigmoid(inputs, errors) {
         let result = [];
         for (let i = 0; i < inputs.length; i++) {
             const deriviate = inputs[i] * (1 - inputs[i]);
@@ -154,7 +117,44 @@ class NeuralNetworkDerivate {
         return result;
     }
 
-    static softmax(inputs, errors) {
+    // RELU ----------------------------------
+
+    static relu() { // 0..1
+        for (let i = 0; i < this.outputs.length; i++) {
+            let x = this.biases[i];
+            for (let j = 0; j < this.inputs.length; j++) {
+                x += this.inputs[j] * this.weights[j][i];
+            }
+            this.outputs[i] = x > 0 ? 1 : 0;
+        }
+    }
+    static drelu(inputs, errors) {
+        let result = [];
+        for (let i = 0; i < inputs.length; i++) {
+            const deriviate = inputs[i] > 0 ? 1 : -0 * inputs[i];
+            result[i] = errors[i] * deriviate;
+        }
+        return result;
+    }
+
+    // SOFTMAX -------------------------------
+
+    static softmax() { // 0..1, sum(all) = 1
+        let sum = 0;
+        let exp = [];
+        for (let i = 0; i < this.outputs.length; i++) {
+            let x = this.biases[i];
+            for (let j = 0; j < this.inputs.length; j++) {
+                x += this.inputs[j] * this.weights[j][i];
+            }
+            exp[i] = Math.exp(x);
+            sum += exp[i];
+        }
+        for (let i = 0; i < this.outputs.length; i++) {
+            this.outputs[i] = exp[i] / sum;
+        }
+    }
+    static dsoftmax(inputs, errors) {
         let x = [];
         let exp = [];
         let sum = 0;
@@ -184,6 +184,56 @@ class NeuralNetworkDerivate {
         return result;
     }
 }
+;;class NeuralNetworkBackPropagation {
+    static SGD = 'sgd';
+    static ADAM = 'adam';
+
+    static backPropagate(network, outputs) {
+        const layers = network.layers;
+        const last = layers[layers.length - 1];
+
+        let error = 0;
+        let errors = [];
+
+        // output layer
+        for (let j = 0; j < last.outputs.length; j++) {
+            errors[j] = last.outputs[j] - outputs[j];
+            error += errors[j] * errors[j];
+        }
+        last.errors = last.derivateFunction(last.outputs, errors);
+
+        // hidden layers
+        for (let l = layers.length - 1; l > 0; l--) {
+            errors = [];
+            for (let i = 0; i < layers[l].inputs.length; i++) {
+                errors[i] = 0;
+                for (let j = 0; j < layers[l].outputs.length; j++) {
+                    errors[i] += layers[l].weights[i][j] * layers[l].errors[j];
+                }
+            }
+            layers[l-1].errors = layers[l-1].derivateFunction(layers[l].inputs, errors);
+        }
+        return error;
+    }
+
+    static train(network, algorithm, trains, rate = 0.01, error = 0.1, epoch = 1000) {
+        const t0 = performance.now();
+        let totalError  = 0;
+        switch(algorithm) {
+            case NeuralNetworkBackPropagation.ADAM:
+                totalError = NeuralNetworkBackPropagationAdam.train(network, trains, rate, error, epoch);
+                break;
+            case NeuralNetworkBackPropagation.SGD:
+            default:
+                totalError = NeuralNetworkBackPropagationSGD.train(network, trains, rate, error, epoch);
+                break;
+        }
+        const t1 = performance.now();
+        console.log('Time: ' + (Math.round((t1 - t0), 2) / 1000) + 's Error=' + totalError);
+        return totalError;
+    }
+}
+
 ;
 class NeuralNetworkBackPropagationAdam {
     static train(network, trains, rate = 0.01, error = 0.1, epoch = 1000) {
@@ -232,37 +282,33 @@ class NeuralNetworkBackPropagationAdam {
 }
 ;
 class NeuralNetworkBackPropagationSGD {
-    static train(network, trains, rate = 0.01, error = 0.1, maxEpoch = 1000) {
-        let epoch = 0;
-        let totalError  = 0;
-        do {
-            totalError  = 0;
-            for (let t = 0; t < trains.length; t++) {
-                totalError += 
-                    NeuralNetworkBackPropagationSGD.#trainEpoch(network, trains[t].inputs, trains[t].outputs, rate);
-            }
-            if (epoch % 10000 == 0) console.log('Epoch: ' + epoch + '; ' + 'Total Error: ' + totalError + '; ');
-        } while (totalError > error && ++epoch < maxEpoch)
-        return totalError;
-    }
-
-    static #trainEpoch(network, inputs, outputs, rate) {
+    static train(network, trains, rate = 0.01, minError = 0.1, maxEpoch = 1000) {
         const layers = network.layers;
 
-        NeuralNetwork.forwardPropagate(network, inputs);
-        const totalError = NeuralNetworkBackPropagation.backPropagate(network, outputs);
+        let epoch = 0;
+        let error = 0;
+        do {
+            error = 0;
+            for (let t = 0; t < trains.length; t++) {
+                NeuralNetwork.forwardPropagate(network, trains[t].inputs);
+                error +=  NeuralNetworkBackPropagation.backPropagate(network, trains[t].outputs);
 
-        // hidden layers
-        for (let l = layers.length - 1; l >= 0; l--) {
-            for (let j = 0; j < layers[l].outputs.length; j++) {
-                layers[l].biases[j] -= rate * layers[l].errors[j];
-                for (let i = 0; i < layers[l].inputs.length; i++) {
-                    layers[l].weights[i][j] -= rate * layers[l].inputs[i] * layers[l].errors[j];
+                for (let l = layers.length - 1; l >= 0; l--) {
+                    for (let j = 0; j < layers[l].outputs.length; j++) {
+                        layers[l].biases[j] -= rate * layers[l].errors[j];
+                        for (let i = 0; i < layers[l].inputs.length; i++) {
+                            layers[l].weights[i][j] -= rate * layers[l].inputs[i] * layers[l].errors[j];
+                        }
+                    }
                 }
             }
-        }
 
-        return totalError;
+            if (epoch % 10000 == 0) 
+                console.log('Epoch: ' + epoch + '; ' + 'Total Error: ' + error + '; ');
+
+        } while (error > minError && ++epoch < maxEpoch);
+
+        return error;
     }
 }
 ;class NeuralNetwork {
@@ -314,79 +360,6 @@ class NeuralNetworkLayer {
                 layer.weights[i][j] = Math.random() * 2 - 1;
             }
             layer.biases[j] = Math.random() * 2 - 1;
-        }
-    }
-}
-
-
-class NeuralNetworkActivation {
-    static RELU = 'relu';
-    static TANH = 'tanh';
-    static SIGMOID = 'sigmoid';
-    static SOFTMAX = 'softmax';
-
-    static init(layer) {
-        switch (layer.activation) {
-            case NeuralNetworkActivation.RELU:
-                layer.activationFunction = NeuralNetworkActivation.relu;
-                layer.derivateFunction = NeuralNetworkActivation.drelu;
-                break;
-            case NeuralNetworkActivation.TANH:
-                layer.activationFunction = NeuralNetworkActivation.tanh;
-                break;
-            case NeuralNetworkActivation.SIGMOID:
-                layer.activationFunction = NeuralNetworkActivation.sigmoid;
-                layer.derivateFunction = NeuralNetworkActivation.dsigmoid;
-                break;
-            case NeuralNetworkActivation.SOFTMAX:
-                layer.activationFunction = NeuralNetworkActivation.softmax;
-                break;
-        }
-    }
-
-    static tanh() { // -1..1
-        for (let i = 0; i < this.outputs.length; i++) {
-            let x = this.biases[i];
-            for (let j = 0; j < this.inputs.length; j++) {
-                x += this.inputs[j] * this.weights[j][i];
-            }
-            this.outputs[i] = Math.tanh(x);
-        }
-    }
-
-    static sigmoid() { // 0..1
-        for (let i = 0; i < this.outputs.length; i++) {
-            let x = this.biases[i];
-            for (let j = 0; j < this.inputs.length; j++) {
-                x += this.inputs[j] * this.weights[j][i];
-            }
-            this.outputs[i] = 1 / (1 + Math.exp(-x));
-        }
-    }
-
-    static relu() { // 0..1
-        for (let i = 0; i < this.outputs.length; i++) {
-            let x = this.biases[i];
-            for (let j = 0; j < this.inputs.length; j++) {
-                x += this.inputs[j] * this.weights[j][i];
-            }
-            this.outputs[i] = x > 0 ? 1 : 0;
-        }
-    }
-
-    static softmax() { // 0..1, sum(all) = 1
-        let sum = 0;
-        let exp = [];
-        for (let i = 0; i < this.outputs.length; i++) {
-            let x = this.biases[i];
-            for (let j = 0; j < this.inputs.length; j++) {
-                x += this.inputs[j] * this.weights[j][i];
-            }
-            exp[i] = Math.exp(x);
-            sum += exp[i];
-        }
-        for (let i = 0; i < this.outputs.length; i++) {
-            this.outputs[i] = exp[i] / sum;
         }
     }
 }
