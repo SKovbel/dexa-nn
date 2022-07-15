@@ -1,6 +1,6 @@
 
 class NeuralNetworkTrainSGD {
-    static train(network, trains, rate = 0.001, minError = 0.1, maxEpoch = 1000) {
+    static train(network, trains, learnRate = 0.001, minError = 0.1, maxEpoch = 1000) {
         const layers = network.layers;
 
         let epoch = 0;
@@ -13,9 +13,9 @@ class NeuralNetworkTrainSGD {
 
                 for (let l = 0; l < layers.length - 1; l++) {
                     for (let j = 0; j < layers[l].outputs.length; j++) {
-                        layers[l].biases[j] -= rate * layers[l].gradients[j];
+                        layers[l].biases[j] -= learnRate * layers[l].gradients[j];
                         for (let i = 0; i < layers[l].inputs.length; i++) {
-                            layers[l].weights[i][j] -= rate * layers[l].inputs[i] * layers[l].gradients[j];
+                            layers[l].weights[i][j] -= learnRate * layers[l].inputs[i] * layers[l].gradients[j];
                         }
                     }
                 }
@@ -26,6 +26,6 @@ class NeuralNetworkTrainSGD {
 
         } while (error > minError && ++epoch < maxEpoch); // 4.508s
 
-        return error;
+        return {'error': error, 'epoch': epoch};
     }
-} // 4.996s, 4.9, 5.19
+} 

@@ -180,7 +180,7 @@
             }
             layers[l-1].gradients = layers[l-1].derivateFunction(layers[l].inputs, errors);
         }
-            return error;
+        return error;
     }
 }
 
@@ -219,26 +219,30 @@ class NeuralNetworkTrain {
     static SGDBP = 'sgdbp';
     static ADAM = 'adam';
 
-    static train(network, algorithm , trains, rate = 0.01, error = 0.1, epoch = 1000) {
+    static train(network, algorithm , trains, learnRate = 0.01, minError = 0.1, maxEpoch = 1000) {
         const t0 = performance.now();
-        let totalError  = 0;
+        const  totalError = 0;
+        let info = {'error': 0, 'epoch': 0};
+        minError = minError * trains.length;
         switch(algorithm) {
             case NeuralNetworkTrain.ADAM:
-                totalError = NeuralNetworkTrainAdam.train(network, trains, rate, error, epoch);
+                info = NeuralNetworkTrainAdam.train(network, trains, learnRate, minError, maxEpoch);
                 break;
             case NeuralNetworkTrain.SGDBP:
-                totalError = NeuralNetworkTrainSGDBP.train(network, trains, rate, error, epoch);
+                info = NeuralNetworkTrainSGDBP.train(network, trains, learnRate, minError, maxEpoch);
                 break;
             case NeuralNetworkTrain.SGD:
-                totalError = NeuralNetworkTrainSGD.train(network, trains, rate, error, epoch);
+                info = NeuralNetworkTrainSGD.train(network, trains, learnRate, minError, maxEpoch);
                 break;
         }
         const t1 = performance.now();
-        console.log('Time: ' + (Math.round((t1 - t0), 2) / 1000) + 's Error=' + totalError);
+        console.log('Time: ' + (Math.round((t1 - t0), 2) / 1000) + 's; Error=' + (info['error'] / trains.length) + '; Epochs=' + info['epoch']);
         return totalError;
     }
 }
 ;class NeuralNetworkTool {
+    EXPIGN = ['inputs', 'outputs', 'gradients', 'momentM', 'momentV'];
+
     static import(data, mutation = 0) {
         const network = (typeof data === 'string') ? JSON.parse(data) : data;
         for (let l = 0; l < network.layers.length; l++) {
@@ -250,7 +254,7 @@ class NeuralNetworkTrain {
 
     static export(network) {
         return JSON.stringify(network, (key, value) => {
-            if (key == 'inputs' || key == 'outputs' || key == 'gradients') {
+            if (key in self.EXPIGN) {
                 return;
             }
             return value;
@@ -296,64 +300,66 @@ class NeuralNetworkTrain {
 }
 ;;
 class NeuralNetworkTrainAdam {
-    static train(network, trains, rate = 0.001, minError = 0.1, maxEpoch = 1000) {
+    static train(network, trains, learnRate = 0.001, minError = 0.1, maxEpoch = 1000) {
         const layers = network.layers;
 
         let epoch = 0;
         let error = 0;
 
-        const beta1 = 0.8;
-        const beta2 = 0.8;
+        const beta1 = 0.901;
+        const beta2 = 0.999;
         const epsilon = 0.000000001;
 
         for (let l = 0; l < layers.length; l++) {
             layers[l].momentM = [];
             layers[l].momentV = [];
-            for (let j = 0; j < layers[l].outputs.length + 1; j++) {
-                layers[l].momentM[j] = 0;
-                layers[l].momentV[j] = 0;
+            for (let i = 0; i < layers[l].inputs.length + 1; i++) { // +1 for biases moments
+                layers[l].momentM[i] = [];
+                layers[l].momentV[i] = [];
+                for (let j = 0; j < layers[l].outputs.length; j++) {
+                    layers[l].momentM[i][j] = 0;
+                    layers[l].momentV[i][j] = 0;
+                }
             }
         }
 
         do {
+            error = 0;
             for (let t = 0; t < trains.length; t++) {
                 NeuralNetwork.forwardPropagate(network, trains[t].inputs);
                 error += NeuralNetwork.backPropagate(network, trains[t].outputs);
-                NeuralNetworkPrint.printNetwork(network);
 
-                for (let l = layers.length - 1; l >= 0; l--) {
+                for (let l = 0; l < layers.length; l++) {
                     const layer = layers[l];
-                    const bPos = layer.outputs.length;
+                    const biasIdx = layer.outputs.length;
 
                     for (let j = 0; j < layer.outputs.length; j++) {
-                        layer.momentM[bPos] = beta1 * layer.momentM[bPos] + (1.0 - beta1) * layer.gradients[j];
-                        layer.momentV[bPos] = beta2 * layer.momentV[bPos] + (1.0 - beta2) * layer.gradients[j] * layer.gradients[j];
-                        let m = layer.momentM[bPos] / (1 - beta1);
-                        let v = layer.momentV[bPos] / (1 - beta2);
-                        layer.biases[j] -= layer.biases[j] - rate * m / (Math.sqrt(v) + epsilon);
-    
+                        const bgrad = layer.biases[j] * layer.gradients[j]
+                        layer.momentM[biasIdx][j] = beta1 * layer.momentM[biasIdx][j] + (1.0 - beta1) * bgrad
+                        layer.momentV[biasIdx][j] = beta2 * layer.momentV[biasIdx][j] + (1.0 - beta2) * bgrad * bgrad;
+                        const m = layer.momentM[biasIdx][j] / (1 - beta1);
+                        const v = layer.momentV[biasIdx][j] / (1 - beta2);
+                        layer.biases[j] -= learnRate * m / (Math.sqrt(v) + epsilon);
+
                         for (let i = 0; i < layer.inputs.length; i++) {
-                            layer.momentM[i] = beta1 * layer.momentM[i] + (1.0 - beta1) * layer.gradients[j];
-                            layer.momentV[i] = beta2 * layer.momentV[i] + (1.0 - beta2) * layer.gradients[j] * layer.gradients[j];
-                            let m = layer.momentM[i] / (1 - beta1);
-                            let v = layer.momentV[i] / (1 - beta2);
-                            layer.weights[i][j] -= layer.weights[i][j] - rate * m / (Math.sqrt(v) + epsilon);
-                            layer.gradients[i] = 0;
+                            const wgrad = layer.inputs[i] * layer.gradients[j];
+                            layer.momentM[i][j] = beta1 * layer.momentM[i][j] + (1.0 - beta1) * wgrad;
+                            layer.momentV[i][j] = beta2 * layer.momentV[i][j] + (1.0 - beta2) * wgrad * wgrad;
+                            const m = layer.momentM[i][j] / (1 - beta1);
+                            const v = layer.momentV[i][j] / (1 - beta2);
+                            layer.weights[i][j] -= learnRate * m / (Math.sqrt(v) + epsilon);
                         }
-                        NeuralNetworkPrint.printArray(layer.gradients, 'Grad')
-                        NeuralNetworkPrint.printArray(layer.momentM, 'M')
-                        NeuralNetworkPrint.printArray(layer.momentV, 'V');
                     }
                 }
             }
             epoch++;
         } while (error > minError && epoch < maxEpoch);
-        return error;
+        return {'error': error, 'epoch': epoch};
     }
 }
 ;// SGD + Back Propagation inside
 class NeuralNetworkTrainSGDBP {
-    static train(network, trains, rate = 0.01, minError = 0.1, maxEpoch = 1000) {
+    static train(network, trains, learnRate = 0.01, minError = 0.1, maxEpoch = 1000) {
         const layers = network.layers;
         const first = layers[0];
         const last = layers[layers.length - 1];
@@ -378,13 +384,13 @@ class NeuralNetworkTrainSGDBP {
                 // hidden layers
                 for (let l = layers.length - 1; l > 0; l--) {
                     for (let j = 0; j < layers[l].outputs.length; j++) {
-                        layers[l].biases[j] -= rate * errorLayers[l][j];
+                        layers[l].biases[j] -= learnRate * errorLayers[l][j];
                     }
                     for (let i = 0; i < layers[l].inputs.length; i++) {
                         errorLayer[i] = 0;
                         for (let j = 0; j < layers[l].outputs.length; j++) {
                             errorLayer[i] += layers[l].weights[i][j] * errorLayers[l][j];
-                            layers[l].weights[i][j] -= rate * layers[l].inputs[i] * errorLayers[l][j];
+                            layers[l].weights[i][j] -= learnRate * layers[l].inputs[i] * errorLayers[l][j];
                         }
                     }
                     errorLayers[l-1] = layers[l-1].derivateFunction(layers[l].inputs, errorLayer);
@@ -392,22 +398,23 @@ class NeuralNetworkTrainSGDBP {
         
                 // execute first layer
                 for (let j = 0; j < first.outputs.length; j++) {
-                    first.biases[j] -= rate * errorLayers[0][j];
+                    first.biases[j] -= learnRate * errorLayers[0][j];
                     for (let i = 0; i < first.inputs.length; i++) {
-                        first.weights[i][j] -= rate * first.inputs[i] * errorLayers[0][j];
+                        first.weights[i][j] -= learnRate * first.inputs[i] * errorLayers[0][j];
                     }
                 }
             }
             epoch++;
             if (epoch % 10000 == 0) 
                 console.log('Epoch: ' + epoch + '; ' + 'Error: ' + error + '; ');
-        } while (error > minError && epoch < maxEpoch)
-        return error;
-    } //4.742s, 4.428s 4.7, 4.44
+        } while (error > minError && epoch < maxEpoch);
+
+        return {'error': error, 'epoch': epoch};
+    }
 }
 ;
 class NeuralNetworkTrainSGD {
-    static train(network, trains, rate = 0.001, minError = 0.1, maxEpoch = 1000) {
+    static train(network, trains, learnRate = 0.001, minError = 0.1, maxEpoch = 1000) {
         const layers = network.layers;
 
         let epoch = 0;
@@ -420,9 +427,9 @@ class NeuralNetworkTrainSGD {
 
                 for (let l = 0; l < layers.length - 1; l++) {
                     for (let j = 0; j < layers[l].outputs.length; j++) {
-                        layers[l].biases[j] -= rate * layers[l].gradients[j];
+                        layers[l].biases[j] -= learnRate * layers[l].gradients[j];
                         for (let i = 0; i < layers[l].inputs.length; i++) {
-                            layers[l].weights[i][j] -= rate * layers[l].inputs[i] * layers[l].gradients[j];
+                            layers[l].weights[i][j] -= learnRate * layers[l].inputs[i] * layers[l].gradients[j];
                         }
                     }
                 }
@@ -433,9 +440,9 @@ class NeuralNetworkTrainSGD {
 
         } while (error > minError && ++epoch < maxEpoch); // 4.508s
 
-        return error;
+        return {'error': error, 'epoch': epoch};
     }
-} // 4.996s, 4.9, 5.19
+} 
 ;class NeuralNetworkPrint {
     static printNetwork(network) {
         console.log('#Network');

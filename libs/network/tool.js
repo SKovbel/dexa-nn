@@ -1,4 +1,6 @@
 class NeuralNetworkTool {
+    EXPIGN = ['inputs', 'outputs', 'gradients', 'momentM', 'momentV'];
+
     static import(data, mutation = 0) {
         const network = (typeof data === 'string') ? JSON.parse(data) : data;
         for (let l = 0; l < network.layers.length; l++) {
@@ -10,7 +12,7 @@ class NeuralNetworkTool {
 
     static export(network) {
         return JSON.stringify(network, (key, value) => {
-            if (key == 'inputs' || key == 'outputs' || key == 'gradients') {
+            if (key in self.EXPIGN) {
                 return;
             }
             return value;

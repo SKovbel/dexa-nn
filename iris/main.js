@@ -4,7 +4,7 @@ class Main {
         this.networkCanvas = networkCanvas;
 
         this.network = new NeuralNetwork([
-            {size: 4, activation: NeuralNetworkActivation.RELU},
+            //{size: 4, activation: NeuralNetworkActivation.RELU},
             {size: 4, activation: NeuralNetworkActivation.TANH},
             {size: 4, activation: NeuralNetworkActivation.SIGMOID},
             {size: 4, activation: NeuralNetworkActivation.SOFTMAX},
@@ -14,7 +14,7 @@ class Main {
 
     train() {
         var train = simpleData.data.filter(item => item.train == true);
-        NeuralNetworkTrain.train(this.network, NeuralNetworkTrain.SGD, train, 0.01, 0.1, 300000);
+        NeuralNetworkTrain.train(this.network, NeuralNetworkTrain.ADAM, train, 0.01, 0.1, 10000);
     }
 
     test() {
