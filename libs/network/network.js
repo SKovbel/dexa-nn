@@ -45,10 +45,10 @@ class NeuralNetwork {
             }
             layers[l-1].gradients = layers[l-1].derivateFunction(layers[l].inputs, errors);
         }
-
-        return error;
+            return error;
     }
 }
+
 
 class NeuralNetworkLayer {
     constructor(inputCount, outputCount, activation = NeuralNetworkActivation.RELU) {
@@ -84,20 +84,20 @@ class NeuralNetworkTrain {
     static SGDBP = 'sgdbp';
     static ADAM = 'adam';
 
-    static train(network, algorithm, trains, rate = 0.01, error = 0.1, epoch = 1000) {
+    static train(network, algorithm , trains, rate = 0.01, error = 0.1, epoch = 1000) {
         const t0 = performance.now();
         let totalError  = 0;
-
-        if (algorithm == NeuralNetworkTrain.ADAM) {
-            totalError = NeuralNetworkTrainAdam.train(network, trains, rate, error, epoch);
-
-        } else if (algorithm == NeuralNetworkTrain.SGDBP) {
-            totalError = NeuralNetworkTrainSGDBP.train(network, trains, rate, error, epoch);
-
-        } else { //SGD, default
-            totalError = NeuralNetworkTrainSGD.train(network, trains, rate, error, epoch);
+        switch(algorithm) {
+            case NeuralNetworkTrain.ADAM:
+                totalError = NeuralNetworkTrainAdam.train(network, trains, rate, error, epoch);
+                break;
+            case NeuralNetworkTrain.SGDBP:
+                totalError = NeuralNetworkTrainSGDBP.train(network, trains, rate, error, epoch);
+                break;
+            case NeuralNetworkTrain.SGD:
+                totalError = NeuralNetworkTrainSGD.train(network, trains, rate, error, epoch);
+                break;
         }
-
         const t1 = performance.now();
         console.log('Time: ' + (Math.round((t1 - t0), 2) / 1000) + 's Error=' + totalError);
         return totalError;
