@@ -19,8 +19,36 @@ class NeuralNetwork {
         }
         return network.layers[network.layers.length - 1].outputs;
     }
-}
 
+    static backPropagate(network, outputs) {
+        const layers = network.layers;
+        const last = layers[layers.length - 1];
+
+        let error = 0;
+        let errors = [];
+
+        // output layer
+        for (let j = 0; j < last.outputs.length; j++) {
+            errors[j] = last.outputs[j] - outputs[j];
+            error += errors[j] * errors[j];
+        }
+        last.gradients = last.derivateFunction(last.outputs, errors);
+
+        // hidden layers
+        for (let l = layers.length - 1; l > 0; l--) {
+            errors = [];
+            for (let i = 0; i < layers[l].inputs.length; i++) {
+                errors[i] = 0;
+                for (let j = 0; j < layers[l].outputs.length; j++) {
+                    errors[i] += layers[l].weights[i][j] * layers[l].gradients[j];
+                }
+            }
+            layers[l-1].gradients = layers[l-1].derivateFunction(layers[l].inputs, errors);
+        }
+
+        return error;
+    }
+}
 
 class NeuralNetworkLayer {
     constructor(inputCount, outputCount, activation = NeuralNetworkActivation.RELU) {
@@ -48,5 +76,30 @@ class NeuralNetworkLayer {
             }
             layer.biases[j] = Math.random() * 2 - 1;
         }
+    }
+}
+
+class NeuralNetworkTrain {
+    static SGD = 'sgd';
+    static SGDBP = 'sgdbp';
+    static ADAM = 'adam';
+
+    static train(network, algorithm, trains, rate = 0.01, error = 0.1, epoch = 1000) {
+        const t0 = performance.now();
+        let totalError  = 0;
+
+        if (algorithm == NeuralNetworkTrain.ADAM) {
+            totalError = NeuralNetworkTrainAdam.train(network, trains, rate, error, epoch);
+
+        } else if (algorithm == NeuralNetworkTrain.SGDBP) {
+            totalError = NeuralNetworkTrainSGDBP.train(network, trains, rate, error, epoch);
+
+        } else { //SGD, default
+            totalError = NeuralNetworkTrainSGD.train(network, trains, rate, error, epoch);
+        }
+
+        const t1 = performance.now();
+        console.log('Time: ' + (Math.round((t1 - t0), 2) / 1000) + 's Error=' + totalError);
+        return totalError;
     }
 }

@@ -10,7 +10,7 @@ class NeuralNetworkTool {
 
     static export(network) {
         return JSON.stringify(network, (key, value) => {
-            if (key == 'inputs' || key == 'outputs' || key == 'errors') {
+            if (key == 'inputs' || key == 'outputs' || key == 'gradients') {
                 return;
             }
             return value;

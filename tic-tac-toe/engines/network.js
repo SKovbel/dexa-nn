@@ -63,21 +63,21 @@ class NetworkEngine extends GameEngine {
                 trains.push({'inputs': [...fields], 'outputs': [...outputs]});
                 fields[histories[i]] = 0;
             }
-            NeuralNetworkBackPropagation.train(this.nn, NeuralNetworkBackPropagation.SGD, trains, rate, 0.1, maxEpoch);
+            NeuralNetworkTrain.train(this.nn, NeuralNetworkTrain.SGD, trains, rate, 0.1, maxEpoch);
             this.save(NeuralNetworkTool.export(this.nn));
         }
 
 
         return
         const trainData = Object.keys(trains).map((k) => trains[k]);
-        NeuralNetworkBackPropagation.train(this.nn, NeuralNetworkBackPropagation.SGD, trainData, 0.01, 0.1, 10000);
+        NeuralNetworkTrain.train(this.nn, NeuralNetworkTrain.SGD, trainData, 0.01, 0.1, 10000);
         this.save(NeuralNetworkTool.export(this.nn));
 
         return;
         while (trainData.length > 0) {
             const chunk = trainData.splice(0, 100);
             console.log(chunk);
-            NeuralNetworkBackPropagation.train(this.nn, NeuralNetworkBackPropagation.SGD, chunk,   0.1, 0.1, 100000);
+            NeuralNetworkTrain.train(this.nn, NeuralNetworkTrain.SGD, chunk,   0.1, 0.1, 100000);
             this.save(this.nn);
         }
     }

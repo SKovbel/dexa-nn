@@ -14,7 +14,7 @@ class Main {
 
     train() {
         var train = simpleData.data.filter(item => item.train == true);
-        NeuralNetworkBackPropagation.train(this.network, NeuralNetworkBackPropagation.SGD, train, 0.01, 0.1, 300000);
+        NeuralNetworkTrain.train(this.network, NeuralNetworkTrain.SGD, train, 0.01, 0.1, 300000);
     }
 
     test() {

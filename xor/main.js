@@ -33,7 +33,8 @@ class Main {
         }
 
         // train
-        NeuralNetworkBackPropagation.train(this.network, NeuralNetworkBackPropagation.SGD, newTrains, 0.1, 0.001, 1000000);
+        NeuralNetworkTrain.train(this.network, NeuralNetworkTrain.SGDBP, newTrains, 0.1, 0.001, 1000000);
+        //NeuralNetworkTrain.train(this.network, NeuralNetworkTrain.ADAM, newTrains, 0.1, 0.001, 1000000);
     }
 
     test() {

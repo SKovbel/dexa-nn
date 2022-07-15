@@ -1,3 +1,35 @@
+class NeuralNetworkPrint {
+    static printNetwork(network) {
+        console.log('#Network');
+        for (let l = 0; l < network.layers.length; l++) {
+            const layer = network.layers[l];
+            console.log('Layer ' + l);
+            let lineb = '';
+            for (let i = 0; i < layer.inputs.length; i++) {
+                let linew = 'W' + i + ': ';
+                for (let j = 0; j < layer.outputs.length; j++) {
+                    linew += String(Math.round(100*layer.weights[i][j])/100).padStart(10);
+                    if (i == 0) {
+                        lineb += String(Math.round(100*layer.biases[i])/100).padStart(10) + 'b';
+                    }
+                }
+                console.log(linew);
+            }
+            console.log('B: ' + lineb);
+        }
+        console.log('#end');
+    }
+    static printArray(data, title) {
+        console.log(title ? title + ' ' : '#Array');
+        let line = '';
+        for (let i = 0; i < data.length; i++) {
+            line += String(Math.round(10000*data[i])/10000).padStart(10);
+        }
+        console.log(line);
+        console.log('#end');
+    }
+}
+
 class NeuralNetworkVisualizer {
     static drawNetwork(ctx, network, outputLabels = []) {
         const margin = 20;
