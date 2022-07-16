@@ -17,8 +17,8 @@ class NeuralNetworkPrint {
             }
             console.log('B: ' + lineb);
         }
-        console.log('#end');
     }
+
     static printArray(data, title) {
         console.log(title ? title + ' ' : '#Array');
         let line = '';
@@ -26,7 +26,20 @@ class NeuralNetworkPrint {
             line += String(Math.round(10000*data[i])/10000).padStart(10);
         }
         console.log(line);
-        console.log('#end');
+    }
+
+    static printMatrix(data, title) {
+        console.log(title ? title + ' ' : '#Matrix');
+        let lineb = '';
+        for (let i = 0; i < data.length; i++) {
+            let lineb = 'I' + i + ': ';
+            for (let j = 0; j < data[i].length; j++) {
+                if (i == 0) {
+                    lineb += String(Math.round(100*layer.biases[i])/100).padStart(10) + 'b';
+                }
+            }
+            console.log(lineb);
+        }
     }
 }
 

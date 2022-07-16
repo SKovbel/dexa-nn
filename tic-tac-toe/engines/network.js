@@ -7,8 +7,8 @@ class NetworkEngine extends GameEngine {
             this.nn = NeuralNetworkTool.import(loaded);
         } else {
             this.nn = new NeuralNetwork([
-                {size: 9, activation: NeuralNetworkActivation.RELU},
                 {size: 9, activation: NeuralNetworkActivation.SIGMOID},
+                {size: 36, activation: NeuralNetworkActivation.SIGMOID},
                 {size: 9}
             ]);
         }
@@ -27,11 +27,13 @@ class NetworkEngine extends GameEngine {
         return bestMove;
     }
 
-    train(data, rate, maxEpoch = 1000) {
+    train(data, rate = 0.001, maxEpoch = 1000) {
         const K = 0.9
         const WIN = 1;
         const DRW = 0;
         const LST = -1;
+        console.log('~');
+        console.log(data);
 
         // unique games only
         /*let uniq = {};
@@ -63,7 +65,7 @@ class NetworkEngine extends GameEngine {
                 trains.push({'inputs': [...fields], 'outputs': [...outputs]});
                 fields[histories[i]] = 0;
             }
-            NeuralNetworkTrain.train(this.nn, NeuralNetworkTrain.SGD, trains, rate, 0.1, maxEpoch);
+            NeuralNetworkTrain.train(this.nn, NeuralNetworkTrain.ADAM, trains, rate, 0.1, maxEpoch);
             this.save(NeuralNetworkTool.export(this.nn));
         }
 

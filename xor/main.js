@@ -16,8 +16,9 @@ class Main {
 
         this.network = new NeuralNetwork([
             {size: 3, activation: NeuralNetworkActivation.TANH},
-            {size: 3, activation: NeuralNetworkActivation.RELU},
-            {size: 3, activation: NeuralNetworkActivation.SOFTMAX},
+            //{size: 3, activation: NeuralNetworkActivation.RELU},
+            //{size: 3, activation: NeuralNetworkActivation.SOFTMAX},
+            //{size: 3, activation: NeuralNetworkActivation.SIGMOID},
             {size: 3, activation: NeuralNetworkActivation.SIGMOID},
             {size: 1},
         ]);
@@ -34,7 +35,8 @@ class Main {
 
         // train
         //NeuralNetworkTrain.train(this.network, NeuralNetworkTrain.SGDBP, newTrains, 0.1, 0.001, 1000000);
-        NeuralNetworkTrain.train(this.network, NeuralNetworkTrain.SGD, newTrains, 0.1, 0.001, 1000000);
+        //NeuralNetworkTrain.train(this.network, NeuralNetworkTrain.SGD, newTrains, 0.1, 0.001, 1000000);
+        NeuralNetworkTrain.train(this.network, NeuralNetworkTrain.ADAM, newTrains, 0.001, 0.1, 100000);
     }
 
     test() {

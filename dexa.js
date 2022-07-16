@@ -1,5 +1,6 @@
 ;;class NeuralNetworkActivation {
     static RELU = 'relu';
+    static LRELU = 'leaky-relu';
     static TANH = 'tanh';
     static SIGMOID = 'sigmoid';
     static SOFTMAX = 'softmax';
@@ -9,6 +10,10 @@
             case NeuralNetworkActivation.RELU:
                 layer.activationFunction = this.relu;
                 layer.derivateFunction = this.drelu;
+                break;
+            case NeuralNetworkActivation.LRELU:
+                layer.activationFunction = this.lrelu;
+                layer.derivateFunction = this.dlrelu;
                 break;
             case NeuralNetworkActivation.TANH:
                 layer.activationFunction = this.tanh;
@@ -80,7 +85,27 @@
     static drelu(inputs, errors) {
         let result = [];
         for (let i = 0; i < inputs.length; i++) {
-            const deriviate = inputs[i] > 0 ? 1 : -0 * inputs[i];
+            const deriviate = inputs[i] > 0 ? 1 : 0 * inputs[i];
+            result[i] = errors[i] * deriviate;
+        }
+        return result;
+    }
+
+    // LEAKY RELU ----------------------------------
+
+    static lrelu() { // 0..1
+        for (let i = 0; i < this.outputs.length; i++) {
+            let x = this.biases[i];
+            for (let j = 0; j < this.inputs.length; j++) {
+                x += this.inputs[j] * this.weights[j][i];
+            }
+            this.outputs[i] = x > 0 ? 1 : 0.01 * x;
+        }
+    }
+    static dlrelu(inputs, errors) {
+        let result = [];
+        for (let i = 0; i < inputs.length; i++) {
+            const deriviate = inputs[i] > 0 ? 1 : 0.01 * inputs[i];
             result[i] = errors[i] * deriviate;
         }
         return result;
@@ -241,8 +266,6 @@ class NeuralNetworkTrain {
     }
 }
 ;class NeuralNetworkTool {
-    EXPIGN = ['inputs', 'outputs', 'gradients', 'momentM', 'momentV'];
-
     static import(data, mutation = 0) {
         const network = (typeof data === 'string') ? JSON.parse(data) : data;
         for (let l = 0; l < network.layers.length; l++) {
@@ -254,7 +277,7 @@ class NeuralNetworkTrain {
 
     static export(network) {
         return JSON.stringify(network, (key, value) => {
-            if (key in self.EXPIGN) {
+            if (['inputs', 'outputs', 'gradients', 'momentM', 'momentV'].indexOf(key) >= 0 ) {
                 return;
             }
             return value;
@@ -323,6 +346,7 @@ class NeuralNetworkTrainAdam {
             }
         }
 
+        console.log(trains);
         do {
             error = 0;
             for (let t = 0; t < trains.length; t++) {
@@ -331,7 +355,7 @@ class NeuralNetworkTrainAdam {
 
                 for (let l = 0; l < layers.length; l++) {
                     const layer = layers[l];
-                    const biasIdx = layer.outputs.length;
+                    const biasIdx = layer.inputs.length;
 
                     for (let j = 0; j < layer.outputs.length; j++) {
                         const bgrad = layer.biases[j] * layer.gradients[j]
@@ -352,12 +376,14 @@ class NeuralNetworkTrainAdam {
                     }
                 }
             }
-            epoch++;
-        } while (error > minError && epoch < maxEpoch);
+            if (epoch % 10000 == 0) {
+                console.log('Epoch: ' + epoch + '; ' + 'Total Error: ' + (error/trains.length) + '; ');
+            }
+        } while (error > minError && ++epoch < maxEpoch);
         return {'error': error, 'epoch': epoch};
     }
 }
-;// SGD + Back Propagation inside
+;// SGD + Back Propagation inside, +15% speed
 class NeuralNetworkTrainSGDBP {
     static train(network, trains, learnRate = 0.01, minError = 0.1, maxEpoch = 1000) {
         const layers = network.layers;
@@ -462,8 +488,8 @@ class NeuralNetworkTrainSGD {
             }
             console.log('B: ' + lineb);
         }
-        console.log('#end');
     }
+
     static printArray(data, title) {
         console.log(title ? title + ' ' : '#Array');
         let line = '';
@@ -471,7 +497,20 @@ class NeuralNetworkTrainSGD {
             line += String(Math.round(10000*data[i])/10000).padStart(10);
         }
         console.log(line);
-        console.log('#end');
+    }
+
+    static printMatrix(data, title) {
+        console.log(title ? title + ' ' : '#Matrix');
+        let lineb = '';
+        for (let i = 0; i < data.length; i++) {
+            let lineb = 'I' + i + ': ';
+            for (let j = 0; j < data[i].length; j++) {
+                if (i == 0) {
+                    lineb += String(Math.round(100*layer.biases[i])/100).padStart(10) + 'b';
+                }
+            }
+            console.log(lineb);
+        }
     }
 }
 

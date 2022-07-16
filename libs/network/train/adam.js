@@ -23,6 +23,7 @@ class NeuralNetworkTrainAdam {
             }
         }
 
+        console.log(trains);
         do {
             error = 0;
             for (let t = 0; t < trains.length; t++) {
@@ -31,7 +32,7 @@ class NeuralNetworkTrainAdam {
 
                 for (let l = 0; l < layers.length; l++) {
                     const layer = layers[l];
-                    const biasIdx = layer.outputs.length;
+                    const biasIdx = layer.inputs.length;
 
                     for (let j = 0; j < layer.outputs.length; j++) {
                         const bgrad = layer.biases[j] * layer.gradients[j]
@@ -52,8 +53,10 @@ class NeuralNetworkTrainAdam {
                     }
                 }
             }
-            epoch++;
-        } while (error > minError && epoch < maxEpoch);
+            if (epoch % 10000 == 0) {
+                console.log('Epoch: ' + epoch + '; ' + 'Total Error: ' + (error/trains.length) + '; ');
+            }
+        } while (error > minError && ++epoch < maxEpoch);
         return {'error': error, 'epoch': epoch};
     }
 }

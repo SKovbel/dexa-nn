@@ -35,13 +35,13 @@ class Main {
     // loop to the end of game, after restart game
     play() {
         this.#resetStats();
-        let maxGames = 100;
+        let maxGames = 2000;
         do {
             if (this.game.move() === null) {
                 continue; // is not finished game, just return
             }
             for (let i = 0; i < 5; i++) {
-                (new NetworkEngine).train([[[...this.game.fields], [...this.game.hist]]] , 0.0001, 1000);
+                (new NetworkEngine).train([[[...this.game.fields], [...this.game.hist]]] , 0.001, 10000);
             }
             maxGames--;
             this.#addStats(this.game);
@@ -117,7 +117,11 @@ class Main {
             if (this.game.move() === null) {
                 continue; // is not finished game, just return
             }
-            (new NetworkEngine).train([[[...this.game.fields], [...this.game.hist]]], 0.01, 100000000);
+            var trainData = [[[...this.game.fields], [...this.game.hist]]];
+            console.log([...this.game.fields]);
+            console.log(trainData);
+            (new NetworkEngine).train(trainData, 0.01, 100);
+            return;
         } while (true);
     }
 }

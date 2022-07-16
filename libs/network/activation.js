@@ -1,5 +1,6 @@
 class NeuralNetworkActivation {
     static RELU = 'relu';
+    static LRELU = 'leaky-relu';
     static TANH = 'tanh';
     static SIGMOID = 'sigmoid';
     static SOFTMAX = 'softmax';
@@ -9,6 +10,10 @@ class NeuralNetworkActivation {
             case NeuralNetworkActivation.RELU:
                 layer.activationFunction = this.relu;
                 layer.derivateFunction = this.drelu;
+                break;
+            case NeuralNetworkActivation.LRELU:
+                layer.activationFunction = this.lrelu;
+                layer.derivateFunction = this.dlrelu;
                 break;
             case NeuralNetworkActivation.TANH:
                 layer.activationFunction = this.tanh;
@@ -80,7 +85,27 @@ class NeuralNetworkActivation {
     static drelu(inputs, errors) {
         let result = [];
         for (let i = 0; i < inputs.length; i++) {
-            const deriviate = inputs[i] > 0 ? 1 : -0 * inputs[i];
+            const deriviate = inputs[i] > 0 ? 1 : 0 * inputs[i];
+            result[i] = errors[i] * deriviate;
+        }
+        return result;
+    }
+
+    // LEAKY RELU ----------------------------------
+
+    static lrelu() { // 0..1
+        for (let i = 0; i < this.outputs.length; i++) {
+            let x = this.biases[i];
+            for (let j = 0; j < this.inputs.length; j++) {
+                x += this.inputs[j] * this.weights[j][i];
+            }
+            this.outputs[i] = x > 0 ? 1 : 0.01 * x;
+        }
+    }
+    static dlrelu(inputs, errors) {
+        let result = [];
+        for (let i = 0; i < inputs.length; i++) {
+            const deriviate = inputs[i] > 0 ? 1 : 0.01 * inputs[i];
             result[i] = errors[i] * deriviate;
         }
         return result;
