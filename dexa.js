@@ -33,12 +33,12 @@
     // TANH ----------------------------------
 
     static tanh() { // -1..1
-        for (let i = 0; i < this.outputs.length; i++) {
-            let x = this.biases[i];
-            for (let j = 0; j < this.inputs.length; j++) {
-                x += this.inputs[j] * this.weights[j][i];
+        for (let j = 0; j < this.outputSize; j++) {
+            let x = this.biases[j];
+            for (let i = 0; i < this.inputSize; i++) {
+                x += this.inputs[i] * this.weights[i][j];
             }
-            this.outputs[i] = Math.tanh(x);
+            this.outputs[j] = Math.tanh(x);
         }
     }
     static dtanh(inputs, errors) {
@@ -54,12 +54,12 @@
     // SIGMOID ------------------------------
 
     static sigmoid() { // 0..1
-        for (let i = 0; i < this.outputs.length; i++) {
-            let x = this.biases[i];
-            for (let j = 0; j < this.inputs.length; j++) {
-                x += this.inputs[j] * this.weights[j][i];
+        for (let j = 0; j < this.outputSize; j++) {
+            let x = this.biases[j];
+            for (let i = 0; i < this.inputSize; i++) {
+                x += this.inputs[i] * this.weights[i][j];
             }
-            this.outputs[i] = 1 / (1 + Math.exp(-x));
+            this.outputs[j] = 1 / (1 + Math.exp(-x));
         }
     }
     static dsigmoid(inputs, errors) {
@@ -74,12 +74,12 @@
     // RELU ----------------------------------
 
     static relu() { // 0..1
-        for (let i = 0; i < this.outputs.length; i++) {
-            let x = this.biases[i];
-            for (let j = 0; j < this.inputs.length; j++) {
-                x += this.inputs[j] * this.weights[j][i];
+        for (let j = 0; j < this.outputSize; j++) {
+            let x = this.biases[j];
+            for (let i = 0; i < this.inputSize; i++) {
+                x += this.inputs[i] * this.weights[i][j];
             }
-            this.outputs[i] = x > 0 ? 1 : 0;
+            this.outputs[j] = x > 0 ? 1 : 0;
         }
     }
     static drelu(inputs, errors) {
@@ -94,12 +94,12 @@
     // LEAKY RELU ----------------------------------
 
     static lrelu() { // 0..1
-        for (let i = 0; i < this.outputs.length; i++) {
-            let x = this.biases[i];
-            for (let j = 0; j < this.inputs.length; j++) {
-                x += this.inputs[j] * this.weights[j][i];
+        for (let j = 0; j < this.outputSize; j++) {
+            let x = this.biases[j];
+            for (let i = 0; i < this.inputSize; i++) {
+                x += this.inputs[i] * this.weights[i][j];
             }
-            this.outputs[i] = x > 0 ? 1 : 0.01 * x;
+            this.outputs[j] = x > 0 ? 1 : 0.01 * x;
         }
     }
     static dlrelu(inputs, errors) {
@@ -116,16 +116,16 @@
     static softmax() { // 0..1, sum(all) = 1
         let sum = 0;
         let exp = [];
-        for (let i = 0; i < this.outputs.length; i++) {
-            let x = this.biases[i];
-            for (let j = 0; j < this.inputs.length; j++) {
-                x += this.inputs[j] * this.weights[j][i];
+        for (let j = 0; j < this.outputSize; j++) {
+            let x = this.biases[j];
+            for (let i = 0; i < this.inputSize; i++) {
+                x += this.inputs[i] * this.weights[i][j];
             }
-            exp[i] = Math.exp(x);
-            sum += exp[i];
+            exp[j] = Math.exp(x);
+            sum += exp[j];
         }
-        for (let i = 0; i < this.outputs.length; i++) {
-            this.outputs[i] = exp[i] / sum;
+        for (let j = 0; j < this.outputSize; j++) {
+            this.outputs[j] = exp[j] / sum;
         }
     }
     static dsoftmax(inputs, errors) {
@@ -188,7 +188,7 @@
         let errors = [];
 
         // output layer
-        for (let j = 0; j < last.outputs.length; j++) {
+        for (let j = 0; j < last.outputSize; j++) {
             errors[j] = last.outputs[j] - outputs[j];
             error += errors[j] * errors[j];
         }
@@ -197,10 +197,10 @@
         // hidden layers
         for (let l = layers.length - 1; l > 0; l--) {
             errors = [];
-            for (let i = 0; i < layers[l].inputs.length; i++) {
+            for (let i = 0; i < layers[l].inputSize; i++) {
                 errors[i] = 0;
-                for (let j = 0; j < layers[l].outputs.length; j++) {
-                    errors[i] += layers[l].weights[i][j] * layers[l].gradients[j];
+                for (let j = 0; j < layers[l].outputSize; j++) {
+                    errors[j] += layers[l].weights[i][j] * layers[l].gradients[j];
                 }
             }
             layers[l-1].gradients = layers[l-1].derivateFunction(layers[l].inputs, errors);
@@ -215,8 +215,8 @@ class NeuralNetworkLayer {
         this.activation = activation;
         this.biases = new Array(outputCount);
         this.weights = new Array(inputCount);
-        for (let j = 0; j < inputCount; j++) {
-            this.weights[j] = new Array(outputCount);
+        for (let i = 0; i < inputCount; i++) {
+            this.weights[i] = new Array(outputCount);
         }
         NeuralNetworkLayer.init(this);
         NeuralNetworkLayer.randomize(this);
@@ -224,14 +224,16 @@ class NeuralNetworkLayer {
 
     // public init, used in load
     static init(layer) {
-        layer.inputs = new Array(layer.weights.length);
-        layer.outputs = new Array(layer.biases.length);
+        layer.inputSize = layer.weights.length; //i
+        layer.outputSize = layer.biases.length; //j   
+        layer.inputs = new Array(layer.inputSizeh);
+        layer.outputs = new Array(layer.outputSize);
         NeuralNetworkActivation.init(layer);
     }
 
     static randomize(layer) {
-        for (let j = 0; j < layer.biases.length; j++) {
-            for (let i = 0; i < layer.weights.length; i++) {
+        for (let j = 0; j < layer.outputSize; j++) {
+            for (let i = 0; i < layer.inputSize; i++) {
                 layer.weights[i][j] = Math.random() * 2 - 1;
             }
             layer.biases[j] = Math.random() * 2 - 1;
@@ -290,13 +292,13 @@ class NeuralNetworkTrain {
             const layer = network.layers[l];
             let newBiases = [];
             let newWeights = [];
-            for (let i = 0; i < layer.inputs.length; i++) {
+            for (let i = 0; i < layer.inputSize; i++) {
                 newWeights[i] = [];
-                for (let j = 0; j < layer.outputs.length; j++) {
+                for (let j = 0; j < layer.outputSize; j++) {
                     newWeights[i][j] = layer.weights[i][j];
                 }
             }
-            for (let j = 0; j < layer.outputs.length; j++) {
+            for (let j = 0; j < layer.outputSize; j++) {
                 newBiases[j] = layer.biases[j];
             }
             newLayers.push({'activation': layer.activation, 'weights': newWeights, 'biases': newBiases});
@@ -308,8 +310,8 @@ class NeuralNetworkTrain {
     static mutate(network, mutation = 0) {
         for (let l = 0; mutation != 0 && l < network.layers.length; l++) {
             const layer = network.layers[l];
-            for (let j = 0; j < layer.outputs.length; j++) {
-                for (let i = 0; i < layer.inputs.length; i++) {
+            for (let j = 0; j < layer.outputSize; j++) {
+                for (let i = 0; i < layer.inputSize; i++) {
                     layer.weights[i][j] = this.#lerp(layer.weights[i][j], 2*Math.random() - 1, mutation);
                 }
                 layer.biases[j] = this.#lerp(layer.biases[j], 2 * Math.random() - 1, mutation);
@@ -323,31 +325,42 @@ class NeuralNetworkTrain {
 }
 ;;
 class NeuralNetworkTrainAdam {
-    static train(network, trains, learnRate = 0.001, minError = 0.1, maxEpoch = 1000) {
+    static options = {
+        rateScale: {
+            epochStep: 10000,
+            multiply: 0.95
+        },
+        mutate: 0.1
+    }
+
+    static train(network, trains, learnRate = 0.001, minError = 0.1, maxEpoch = 1000, options = {}) {
+        options = Object.assign(options, this.options);
         const layers = network.layers;
 
         let epoch = 0;
         let error = 0;
+        let prevError = 0;
 
         const beta1 = 0.901;
         const beta2 = 0.999;
         const epsilon = 0.000000001;
 
         for (let l = 0; l < layers.length; l++) {
-            layers[l].momentM = [];
-            layers[l].momentV = [];
-            for (let i = 0; i < layers[l].inputs.length + 1; i++) { // +1 for biases moments
-                layers[l].momentM[i] = [];
-                layers[l].momentV[i] = [];
-                for (let j = 0; j < layers[l].outputs.length; j++) {
-                    layers[l].momentM[i][j] = 0;
-                    layers[l].momentV[i][j] = 0;
+            const layer = layers[l];
+            layer.momentM = [];
+            layer.momentV = [];
+            for (let i = 0; i < layer.inputSize + 1; i++) { // +1 for biases moments
+                layer.momentM[i] = [];
+                layer.momentV[i] = [];
+                for (let j = 0; j < layer.outputSize; j++) {
+                    layer.momentM[i][j] = 0;
+                    layer.momentV[i][j] = 0;
                 }
             }
         }
 
-        console.log(trains);
         do {
+            prevError = error;
             error = 0;
             for (let t = 0; t < trains.length; t++) {
                 NeuralNetwork.forwardPropagate(network, trains[t].inputs);
@@ -355,9 +368,9 @@ class NeuralNetworkTrainAdam {
 
                 for (let l = 0; l < layers.length; l++) {
                     const layer = layers[l];
-                    const biasIdx = layer.inputs.length;
+                    const biasIdx = layer.inputSize;
 
-                    for (let j = 0; j < layer.outputs.length; j++) {
+                    for (let j = 0; j < layer.outputSize; j++) {
                         const bgrad = layer.biases[j] * layer.gradients[j]
                         layer.momentM[biasIdx][j] = beta1 * layer.momentM[biasIdx][j] + (1.0 - beta1) * bgrad
                         layer.momentV[biasIdx][j] = beta2 * layer.momentV[biasIdx][j] + (1.0 - beta2) * bgrad * bgrad;
@@ -365,7 +378,7 @@ class NeuralNetworkTrainAdam {
                         const v = layer.momentV[biasIdx][j] / (1 - beta2);
                         layer.biases[j] -= learnRate * m / (Math.sqrt(v) + epsilon);
 
-                        for (let i = 0; i < layer.inputs.length; i++) {
+                        for (let i = 0; i < layer.inputSize; i++) {
                             const wgrad = layer.inputs[i] * layer.gradients[j];
                             layer.momentM[i][j] = beta1 * layer.momentM[i][j] + (1.0 - beta1) * wgrad;
                             layer.momentV[i][j] = beta2 * layer.momentV[i][j] + (1.0 - beta2) * wgrad * wgrad;
@@ -376,16 +389,24 @@ class NeuralNetworkTrainAdam {
                     }
                 }
             }
+            if (epoch % options.rateScale.epochStep == 0) {
+                learnRate *= this.options.rateScale.multiply;
+                console.log('Epoch: ' + epoch + '; ' + 'New Learning rate: ' + learnRate + '; ');
+            }
             if (epoch % 10000 == 0) {
                 console.log('Epoch: ' + epoch + '; ' + 'Total Error: ' + (error/trains.length) + '; ');
             }
+            if (options.mutate && prevError == error) {
+                NeuralNetworkTool.mutate(network, options.mutate);
+            }
         } while (error > minError && ++epoch < maxEpoch);
+
         return {'error': error, 'epoch': epoch};
     }
 }
 ;// SGD + Back Propagation inside, +15% speed
 class NeuralNetworkTrainSGDBP {
-    static train(network, trains, learnRate = 0.01, minError = 0.1, maxEpoch = 1000) {
+    static train(network, trains, learnRate = 0.01, minError = 0.1, maxEpoch = 1000, options = {}) {
         const layers = network.layers;
         const first = layers[0];
         const last = layers[layers.length - 1];
@@ -401,7 +422,7 @@ class NeuralNetworkTrainSGDBP {
                 let errorLayers = [];
         
                 // output layer
-                for (let j = 0; j < last.outputs.length; j++) {
+                for (let j = 0; j < last.outputSize; j++) {
                     errorLayer[j] = last.outputs[j] - trains[t].outputs[j];
                     error += errorLayer[j] * errorLayer[j];
                 }
@@ -409,12 +430,12 @@ class NeuralNetworkTrainSGDBP {
         
                 // hidden layers
                 for (let l = layers.length - 1; l > 0; l--) {
-                    for (let j = 0; j < layers[l].outputs.length; j++) {
+                    for (let j = 0; j < layers[l].outputSize; j++) {
                         layers[l].biases[j] -= learnRate * errorLayers[l][j];
                     }
-                    for (let i = 0; i < layers[l].inputs.length; i++) {
+                    for (let i = 0; i < layers[l].inputSize; i++) {
                         errorLayer[i] = 0;
-                        for (let j = 0; j < layers[l].outputs.length; j++) {
+                        for (let j = 0; j < layers[l].outputSize; j++) {
                             errorLayer[i] += layers[l].weights[i][j] * errorLayers[l][j];
                             layers[l].weights[i][j] -= learnRate * layers[l].inputs[i] * errorLayers[l][j];
                         }
@@ -423,9 +444,9 @@ class NeuralNetworkTrainSGDBP {
                 }
         
                 // execute first layer
-                for (let j = 0; j < first.outputs.length; j++) {
+                for (let j = 0; j < first.outputSize; j++) {
                     first.biases[j] -= learnRate * errorLayers[0][j];
-                    for (let i = 0; i < first.inputs.length; i++) {
+                    for (let i = 0; i < first.inputSize; i++) {
                         first.weights[i][j] -= learnRate * first.inputs[i] * errorLayers[0][j];
                     }
                 }
@@ -440,7 +461,7 @@ class NeuralNetworkTrainSGDBP {
 }
 ;
 class NeuralNetworkTrainSGD {
-    static train(network, trains, learnRate = 0.001, minError = 0.1, maxEpoch = 1000) {
+    static train(network, trains, learnRate = 0.001, minError = 0.1, maxEpoch = 1000, options = {}) {
         const layers = network.layers;
 
         let epoch = 0;
@@ -452,17 +473,18 @@ class NeuralNetworkTrainSGD {
                 error +=  NeuralNetwork.backPropagate(network, trains[t].outputs);
 
                 for (let l = 0; l < layers.length - 1; l++) {
-                    for (let j = 0; j < layers[l].outputs.length; j++) {
+                    for (let j = 0; j < layers[l].outputSize; j++) {
                         layers[l].biases[j] -= learnRate * layers[l].gradients[j];
-                        for (let i = 0; i < layers[l].inputs.length; i++) {
+                        for (let i = 0; i < layers[l].inputSize; i++) {
                             layers[l].weights[i][j] -= learnRate * layers[l].inputs[i] * layers[l].gradients[j];
                         }
                     }
                 }
             }
 
-            if (epoch % 10000 == 0) 
-                console.log('Epoch: ' + epoch + '; ' + 'Total Error: ' + error + '; ');
+            if (epoch % 10000 == 0) {
+                console.log('Epoch: ' + epoch + '; ' + 'Total Error: ' + (error/trains.length) + '; ');
+            }
 
         } while (error > minError && ++epoch < maxEpoch); // 4.508s
 
@@ -476,9 +498,9 @@ class NeuralNetworkTrainSGD {
             const layer = network.layers[l];
             console.log('Layer ' + l);
             let lineb = '';
-            for (let i = 0; i < layer.inputs.length; i++) {
+            for (let i = 0; i < layer.inputSize; i++) {
                 let linew = 'W' + i + ': ';
-                for (let j = 0; j < layer.outputs.length; j++) {
+                for (let j = 0; j < layer.outputSize; j++) {
                     linew += String(Math.round(100*layer.weights[i][j])/100).padStart(10);
                     if (i == 0) {
                         lineb += String(Math.round(100*layer.biases[i])/100).padStart(10) + 'b';
@@ -501,13 +523,10 @@ class NeuralNetworkTrainSGD {
 
     static printMatrix(data, title) {
         console.log(title ? title + ' ' : '#Matrix');
-        let lineb = '';
         for (let i = 0; i < data.length; i++) {
-            let lineb = 'I' + i + ': ';
+            let lineb =  + '';
             for (let j = 0; j < data[i].length; j++) {
-                if (i == 0) {
-                    lineb += String(Math.round(100*layer.biases[i])/100).padStart(10) + 'b';
-                }
+                lineb += String(Math.round(1000*data[i][j])/1000).padStart(10);
             }
             console.log(lineb);
         }
@@ -543,8 +562,8 @@ class NeuralNetworkVisualizer {
         const {activation, inputs, outputs, weights, biases} = layer;
 
         ctx.setLineDash([7, 3]);
-        for (let i = 0; i < inputs.length; i++) {
-            for (let j = 0; j < outputs.length; j++) {
+        for (let i = 0; i < layer.inputSize; i++) {
+            for (let j = 0; j < layer.outputSize; j++) {
                 ctx.beginPath();
                 ctx.moveTo(NeuralNetworkVisualizer.#lerp(inputs, i, left, right), bottom);
                 ctx.lineTo(NeuralNetworkVisualizer.#lerp(outputs, j, left, right), top)
@@ -559,7 +578,7 @@ class NeuralNetworkVisualizer {
         ctx.fillStyle = "white";
         ctx.fillText(activation, left - 10, bottom - 30);
 
-        for (let i = 0; i < inputs.length; i++) {
+        for (let i = 0; i < layer.inputSize; i++) {
             const x = NeuralNetworkVisualizer.#lerp(inputs, i, left, right);
 
             ctx.beginPath();
@@ -573,7 +592,7 @@ class NeuralNetworkVisualizer {
             ctx.fill();
         }
 
-        for (let i = 0; i < outputs.length; i++) {
+        for (let i = 0; i < layer.outputSize; i++) {
             const x = NeuralNetworkVisualizer.#lerp(outputs, i, left, right);
 
             ctx.beginPath();

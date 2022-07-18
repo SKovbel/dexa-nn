@@ -23,13 +23,13 @@ class NeuralNetworkTool {
             const layer = network.layers[l];
             let newBiases = [];
             let newWeights = [];
-            for (let i = 0; i < layer.inputs.length; i++) {
+            for (let i = 0; i < layer.inputSize; i++) {
                 newWeights[i] = [];
-                for (let j = 0; j < layer.outputs.length; j++) {
+                for (let j = 0; j < layer.outputSize; j++) {
                     newWeights[i][j] = layer.weights[i][j];
                 }
             }
-            for (let j = 0; j < layer.outputs.length; j++) {
+            for (let j = 0; j < layer.outputSize; j++) {
                 newBiases[j] = layer.biases[j];
             }
             newLayers.push({'activation': layer.activation, 'weights': newWeights, 'biases': newBiases});
@@ -41,8 +41,8 @@ class NeuralNetworkTool {
     static mutate(network, mutation = 0) {
         for (let l = 0; mutation != 0 && l < network.layers.length; l++) {
             const layer = network.layers[l];
-            for (let j = 0; j < layer.outputs.length; j++) {
-                for (let i = 0; i < layer.inputs.length; i++) {
+            for (let j = 0; j < layer.outputSize; j++) {
+                for (let i = 0; i < layer.inputSize; i++) {
                     layer.weights[i][j] = this.#lerp(layer.weights[i][j], 2*Math.random() - 1, mutation);
                 }
                 layer.biases[j] = this.#lerp(layer.biases[j], 2 * Math.random() - 1, mutation);

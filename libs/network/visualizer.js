@@ -5,9 +5,9 @@ class NeuralNetworkPrint {
             const layer = network.layers[l];
             console.log('Layer ' + l);
             let lineb = '';
-            for (let i = 0; i < layer.inputs.length; i++) {
+            for (let i = 0; i < layer.inputSize; i++) {
                 let linew = 'W' + i + ': ';
-                for (let j = 0; j < layer.outputs.length; j++) {
+                for (let j = 0; j < layer.outputSize; j++) {
                     linew += String(Math.round(100*layer.weights[i][j])/100).padStart(10);
                     if (i == 0) {
                         lineb += String(Math.round(100*layer.biases[i])/100).padStart(10) + 'b';
@@ -30,13 +30,10 @@ class NeuralNetworkPrint {
 
     static printMatrix(data, title) {
         console.log(title ? title + ' ' : '#Matrix');
-        let lineb = '';
         for (let i = 0; i < data.length; i++) {
-            let lineb = 'I' + i + ': ';
+            let lineb =  + '';
             for (let j = 0; j < data[i].length; j++) {
-                if (i == 0) {
-                    lineb += String(Math.round(100*layer.biases[i])/100).padStart(10) + 'b';
-                }
+                lineb += String(Math.round(1000*data[i][j])/1000).padStart(10);
             }
             console.log(lineb);
         }
@@ -72,8 +69,8 @@ class NeuralNetworkVisualizer {
         const {activation, inputs, outputs, weights, biases} = layer;
 
         ctx.setLineDash([7, 3]);
-        for (let i = 0; i < inputs.length; i++) {
-            for (let j = 0; j < outputs.length; j++) {
+        for (let i = 0; i < layer.inputSize; i++) {
+            for (let j = 0; j < layer.outputSize; j++) {
                 ctx.beginPath();
                 ctx.moveTo(NeuralNetworkVisualizer.#lerp(inputs, i, left, right), bottom);
                 ctx.lineTo(NeuralNetworkVisualizer.#lerp(outputs, j, left, right), top)
@@ -88,7 +85,7 @@ class NeuralNetworkVisualizer {
         ctx.fillStyle = "white";
         ctx.fillText(activation, left - 10, bottom - 30);
 
-        for (let i = 0; i < inputs.length; i++) {
+        for (let i = 0; i < layer.inputSize; i++) {
             const x = NeuralNetworkVisualizer.#lerp(inputs, i, left, right);
 
             ctx.beginPath();
@@ -102,7 +99,7 @@ class NeuralNetworkVisualizer {
             ctx.fill();
         }
 
-        for (let i = 0; i < outputs.length; i++) {
+        for (let i = 0; i < layer.outputSize; i++) {
             const x = NeuralNetworkVisualizer.#lerp(outputs, i, left, right);
 
             ctx.beginPath();

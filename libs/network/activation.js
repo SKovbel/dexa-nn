@@ -33,12 +33,12 @@ class NeuralNetworkActivation {
     // TANH ----------------------------------
 
     static tanh() { // -1..1
-        for (let i = 0; i < this.outputs.length; i++) {
-            let x = this.biases[i];
-            for (let j = 0; j < this.inputs.length; j++) {
-                x += this.inputs[j] * this.weights[j][i];
+        for (let j = 0; j < this.outputSize; j++) {
+            let x = this.biases[j];
+            for (let i = 0; i < this.inputSize; i++) {
+                x += this.inputs[i] * this.weights[i][j];
             }
-            this.outputs[i] = Math.tanh(x);
+            this.outputs[j] = Math.tanh(x);
         }
     }
     static dtanh(inputs, errors) {
@@ -54,12 +54,12 @@ class NeuralNetworkActivation {
     // SIGMOID ------------------------------
 
     static sigmoid() { // 0..1
-        for (let i = 0; i < this.outputs.length; i++) {
-            let x = this.biases[i];
-            for (let j = 0; j < this.inputs.length; j++) {
-                x += this.inputs[j] * this.weights[j][i];
+        for (let j = 0; j < this.outputSize; j++) {
+            let x = this.biases[j];
+            for (let i = 0; i < this.inputSize; i++) {
+                x += this.inputs[i] * this.weights[i][j];
             }
-            this.outputs[i] = 1 / (1 + Math.exp(-x));
+            this.outputs[j] = 1 / (1 + Math.exp(-x));
         }
     }
     static dsigmoid(inputs, errors) {
@@ -74,12 +74,12 @@ class NeuralNetworkActivation {
     // RELU ----------------------------------
 
     static relu() { // 0..1
-        for (let i = 0; i < this.outputs.length; i++) {
-            let x = this.biases[i];
-            for (let j = 0; j < this.inputs.length; j++) {
-                x += this.inputs[j] * this.weights[j][i];
+        for (let j = 0; j < this.outputSize; j++) {
+            let x = this.biases[j];
+            for (let i = 0; i < this.inputSize; i++) {
+                x += this.inputs[i] * this.weights[i][j];
             }
-            this.outputs[i] = x > 0 ? 1 : 0;
+            this.outputs[j] = x > 0 ? 1 : 0;
         }
     }
     static drelu(inputs, errors) {
@@ -94,12 +94,12 @@ class NeuralNetworkActivation {
     // LEAKY RELU ----------------------------------
 
     static lrelu() { // 0..1
-        for (let i = 0; i < this.outputs.length; i++) {
-            let x = this.biases[i];
-            for (let j = 0; j < this.inputs.length; j++) {
-                x += this.inputs[j] * this.weights[j][i];
+        for (let j = 0; j < this.outputSize; j++) {
+            let x = this.biases[j];
+            for (let i = 0; i < this.inputSize; i++) {
+                x += this.inputs[i] * this.weights[i][j];
             }
-            this.outputs[i] = x > 0 ? 1 : 0.01 * x;
+            this.outputs[j] = x > 0 ? 1 : 0.01 * x;
         }
     }
     static dlrelu(inputs, errors) {
@@ -116,16 +116,16 @@ class NeuralNetworkActivation {
     static softmax() { // 0..1, sum(all) = 1
         let sum = 0;
         let exp = [];
-        for (let i = 0; i < this.outputs.length; i++) {
-            let x = this.biases[i];
-            for (let j = 0; j < this.inputs.length; j++) {
-                x += this.inputs[j] * this.weights[j][i];
+        for (let j = 0; j < this.outputSize; j++) {
+            let x = this.biases[j];
+            for (let i = 0; i < this.inputSize; i++) {
+                x += this.inputs[i] * this.weights[i][j];
             }
-            exp[i] = Math.exp(x);
-            sum += exp[i];
+            exp[j] = Math.exp(x);
+            sum += exp[j];
         }
-        for (let i = 0; i < this.outputs.length; i++) {
-            this.outputs[i] = exp[i] / sum;
+        for (let j = 0; j < this.outputSize; j++) {
+            this.outputs[j] = exp[j] / sum;
         }
     }
     static dsoftmax(inputs, errors) {

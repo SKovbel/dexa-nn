@@ -1,3 +1,6 @@
+/*
+ * thanks to https://nestedsoftware.com/2019/12/27/tic-tac-toe-with-a-neural-network-1fjn.206436.html
+ */
 class Main {
     constructor(statsElement, boardCanvas, networkCanvas) {
         this.statsElement = statsElement;
@@ -35,13 +38,13 @@ class Main {
     // loop to the end of game, after restart game
     play() {
         this.#resetStats();
-        let maxGames = 2000;
+        let maxGames = 50;
         do {
             if (this.game.move() === null) {
                 continue; // is not finished game, just return
             }
             for (let i = 0; i < 5; i++) {
-                (new NetworkEngine).train([[[...this.game.fields], [...this.game.hist]]] , 0.001, 10000);
+                (new NetworkEngine).train([[[...this.game.fields], [...this.game.hist]]]);
             }
             maxGames--;
             this.#addStats(this.game);
@@ -118,9 +121,16 @@ class Main {
                 continue; // is not finished game, just return
             }
             var trainData = [[[...this.game.fields], [...this.game.hist]]];
-            console.log([...this.game.fields]);
-            console.log(trainData);
-            (new NetworkEngine).train(trainData, 0.01, 100);
+            trainData = [[
+                [1, 1, 1, 0, 0, -1, -1, -1, 1],
+                [8, 7, 1, 6, 2, 5, 0]
+            ]];
+            NeuralNetworkPrint.printMatrix(trainData[0]);
+            const ne = new NetworkEngine();
+            ne.train(trainData, 0.1, 0.1, 30000);
+            NeuralNetworkPrint.printArray(NeuralNetwork.forwardPropagate(ne.nn, [0, 1, 1, 0, 0, -1, -1, -1, 1])); // 0
+            NeuralNetworkPrint.printArray(NeuralNetwork.forwardPropagate(ne.nn, [0, 1, 1, 0, 0, 0, -1, -1, 1]));
+            console.log(ne)
             return;
         } while (true);
     }

@@ -28,7 +28,7 @@ class NeuralNetwork {
         let errors = [];
 
         // output layer
-        for (let j = 0; j < last.outputs.length; j++) {
+        for (let j = 0; j < last.outputSize; j++) {
             errors[j] = last.outputs[j] - outputs[j];
             error += errors[j] * errors[j];
         }
@@ -37,10 +37,10 @@ class NeuralNetwork {
         // hidden layers
         for (let l = layers.length - 1; l > 0; l--) {
             errors = [];
-            for (let i = 0; i < layers[l].inputs.length; i++) {
+            for (let i = 0; i < layers[l].inputSize; i++) {
                 errors[i] = 0;
-                for (let j = 0; j < layers[l].outputs.length; j++) {
-                    errors[i] += layers[l].weights[i][j] * layers[l].gradients[j];
+                for (let j = 0; j < layers[l].outputSize; j++) {
+                    errors[j] += layers[l].weights[i][j] * layers[l].gradients[j];
                 }
             }
             layers[l-1].gradients = layers[l-1].derivateFunction(layers[l].inputs, errors);
@@ -55,8 +55,8 @@ class NeuralNetworkLayer {
         this.activation = activation;
         this.biases = new Array(outputCount);
         this.weights = new Array(inputCount);
-        for (let j = 0; j < inputCount; j++) {
-            this.weights[j] = new Array(outputCount);
+        for (let i = 0; i < inputCount; i++) {
+            this.weights[i] = new Array(outputCount);
         }
         NeuralNetworkLayer.init(this);
         NeuralNetworkLayer.randomize(this);
@@ -64,14 +64,16 @@ class NeuralNetworkLayer {
 
     // public init, used in load
     static init(layer) {
-        layer.inputs = new Array(layer.weights.length);
-        layer.outputs = new Array(layer.biases.length);
+        layer.inputSize = layer.weights.length; //i
+        layer.outputSize = layer.biases.length; //j   
+        layer.inputs = new Array(layer.inputSizeh);
+        layer.outputs = new Array(layer.outputSize);
         NeuralNetworkActivation.init(layer);
     }
 
     static randomize(layer) {
-        for (let j = 0; j < layer.biases.length; j++) {
-            for (let i = 0; i < layer.weights.length; i++) {
+        for (let j = 0; j < layer.outputSize; j++) {
+            for (let i = 0; i < layer.inputSize; i++) {
                 layer.weights[i][j] = Math.random() * 2 - 1;
             }
             layer.biases[j] = Math.random() * 2 - 1;

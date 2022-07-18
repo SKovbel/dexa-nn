@@ -5,6 +5,7 @@ class Main {
 
         this.network = new NeuralNetwork([
             {size: 4, activation: NeuralNetworkActivation.LRELU},
+            {size: 4, activation: NeuralNetworkActivation.RELU},
             {size: 4, activation: NeuralNetworkActivation.TANH},
             {size: 4, activation: NeuralNetworkActivation.SIGMOID},
             {size: 4, activation: NeuralNetworkActivation.SOFTMAX},
