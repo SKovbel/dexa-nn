@@ -3,7 +3,7 @@ class NeuralNetworkPrint {
         console.log('#Network');
         for (let l = 0; l < network.layers.length; l++) {
             const layer = network.layers[l];
-            console.log('Layer ' + l);
+            console.log('Layer ' + l + ':');
             let lineb = '';
             for (let i = 0; i < layer.inputSize; i++) {
                 let linew = 'W' + i + ': ';
@@ -31,7 +31,7 @@ class NeuralNetworkPrint {
     static printMatrix(data, title) {
         console.log(title ? title + ' ' : '#Matrix');
         for (let i = 0; i < data.length; i++) {
-            let lineb =  + '';
+            let lineb = i + ':';
             for (let j = 0; j < data[i].length; j++) {
                 lineb += String(Math.round(1000*data[i][j])/1000).padStart(10);
             }

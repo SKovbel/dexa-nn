@@ -51,10 +51,10 @@ class NeuralNetwork {
 
 
 class NeuralNetworkLayer {
-    constructor(inputCount, outputCount, activation = NeuralNetworkActivation.RELU) {
-        this.activation = activation;
+    constructor(inputCount, outputCount, activation = NeuralNetworkActivation.SIGMOID) {
         this.biases = new Array(outputCount);
         this.weights = new Array(inputCount);
+        this.activation = activation;
         for (let i = 0; i < inputCount; i++) {
             this.weights[i] = new Array(outputCount);
         }
@@ -64,8 +64,8 @@ class NeuralNetworkLayer {
 
     // public init, used in load
     static init(layer) {
-        layer.inputSize = layer.weights.length; //i
-        layer.outputSize = layer.biases.length; //j   
+        layer.inputSize = layer.weights.length;
+        layer.outputSize = layer.biases.length; 
         layer.inputs = new Array(layer.inputSizeh);
         layer.outputs = new Array(layer.outputSize);
         NeuralNetworkActivation.init(layer);
@@ -90,7 +90,6 @@ class NeuralNetworkTrain {
         const t0 = performance.now();
         const  totalError = 0;
         let info = {'error': 0, 'epoch': 0};
-        minError = minError * trains.length;
         switch(algorithm) {
             case NeuralNetworkTrain.ADAM:
                 info = NeuralNetworkTrainAdam.train(network, trains, learnRate, minError, maxEpoch);
@@ -103,7 +102,7 @@ class NeuralNetworkTrain {
                 break;
         }
         const t1 = performance.now();
-        console.log('Time: ' + (Math.round((t1 - t0), 2) / 1000) + 's; Error=' + (info['error'] / trains.length) + '; Epochs=' + info['epoch']);
+        console.log('Time: ' + (Math.round((t1 - t0), 2) / 1000) + 's; Error=' + (info['error']) + '; Epochs=' + info['epoch']);
         return totalError;
     }
 }

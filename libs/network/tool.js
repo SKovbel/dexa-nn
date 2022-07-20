@@ -10,7 +10,7 @@ class NeuralNetworkTool {
 
     static export(network) {
         return JSON.stringify(network, (key, value) => {
-            if (['inputs', 'outputs', 'gradients', 'momentM', 'momentV'].indexOf(key) >= 0 ) {
+            if (['inputs', 'outputs', 'gradients', 'momentM', 'momentV', 'inputSize', 'outputSize'].indexOf(key) >= 0 ) {
                 return;
             }
             return value;

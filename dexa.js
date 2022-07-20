@@ -211,10 +211,10 @@
 
 
 class NeuralNetworkLayer {
-    constructor(inputCount, outputCount, activation = NeuralNetworkActivation.RELU) {
-        this.activation = activation;
+    constructor(inputCount, outputCount, activation = NeuralNetworkActivation.SIGMOID) {
         this.biases = new Array(outputCount);
         this.weights = new Array(inputCount);
+        this.activation = activation;
         for (let i = 0; i < inputCount; i++) {
             this.weights[i] = new Array(outputCount);
         }
@@ -224,8 +224,8 @@ class NeuralNetworkLayer {
 
     // public init, used in load
     static init(layer) {
-        layer.inputSize = layer.weights.length; //i
-        layer.outputSize = layer.biases.length; //j   
+        layer.inputSize = layer.weights.length;
+        layer.outputSize = layer.biases.length; 
         layer.inputs = new Array(layer.inputSizeh);
         layer.outputs = new Array(layer.outputSize);
         NeuralNetworkActivation.init(layer);
@@ -250,7 +250,6 @@ class NeuralNetworkTrain {
         const t0 = performance.now();
         const  totalError = 0;
         let info = {'error': 0, 'epoch': 0};
-        minError = minError * trains.length;
         switch(algorithm) {
             case NeuralNetworkTrain.ADAM:
                 info = NeuralNetworkTrainAdam.train(network, trains, learnRate, minError, maxEpoch);
@@ -263,7 +262,7 @@ class NeuralNetworkTrain {
                 break;
         }
         const t1 = performance.now();
-        console.log('Time: ' + (Math.round((t1 - t0), 2) / 1000) + 's; Error=' + (info['error'] / trains.length) + '; Epochs=' + info['epoch']);
+        console.log('Time: ' + (Math.round((t1 - t0), 2) / 1000) + 's; Error=' + (info['error']) + '; Epochs=' + info['epoch']);
         return totalError;
     }
 }
@@ -279,7 +278,7 @@ class NeuralNetworkTrain {
 
     static export(network) {
         return JSON.stringify(network, (key, value) => {
-            if (['inputs', 'outputs', 'gradients', 'momentM', 'momentV'].indexOf(key) >= 0 ) {
+            if (['inputs', 'outputs', 'gradients', 'momentM', 'momentV', 'inputSize', 'outputSize'].indexOf(key) >= 0 ) {
                 return;
             }
             return value;
@@ -391,10 +390,10 @@ class NeuralNetworkTrainAdam {
             }
             if (epoch % options.rateScale.epochStep == 0) {
                 learnRate *= this.options.rateScale.multiply;
-                console.log('Epoch: ' + epoch + '; ' + 'New Learning rate: ' + learnRate + '; ');
+                //console.log('Epoch: ' + epoch + '; ' + 'New Learning rate: ' + learnRate + '; ');
             }
-            if (epoch % 10000 == 0) {
-                console.log('Epoch: ' + epoch + '; ' + 'Total Error: ' + (error/trains.length) + '; ');
+            if (epoch % 10000 == 0 && epoch) {
+                //console.log('Epoch: ' + epoch + '; ' + 'Total Error: ' + (error) + '; ');
             }
             if (options.mutate && prevError == error) {
                 NeuralNetworkTool.mutate(network, options.mutate);
@@ -483,7 +482,7 @@ class NeuralNetworkTrainSGD {
             }
 
             if (epoch % 10000 == 0) {
-                console.log('Epoch: ' + epoch + '; ' + 'Total Error: ' + (error/trains.length) + '; ');
+                console.log('Epoch: ' + epoch + '; ' + 'Total Error: ' + (error) + '; ');
             }
 
         } while (error > minError && ++epoch < maxEpoch); // 4.508s
@@ -496,7 +495,7 @@ class NeuralNetworkTrainSGD {
         console.log('#Network');
         for (let l = 0; l < network.layers.length; l++) {
             const layer = network.layers[l];
-            console.log('Layer ' + l);
+            console.log('Layer ' + l + ':');
             let lineb = '';
             for (let i = 0; i < layer.inputSize; i++) {
                 let linew = 'W' + i + ': ';
@@ -524,7 +523,7 @@ class NeuralNetworkTrainSGD {
     static printMatrix(data, title) {
         console.log(title ? title + ' ' : '#Matrix');
         for (let i = 0; i < data.length; i++) {
-            let lineb =  + '';
+            let lineb = i + ':';
             for (let j = 0; j < data[i].length; j++) {
                 lineb += String(Math.round(1000*data[i][j])/1000).padStart(10);
             }

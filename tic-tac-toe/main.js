@@ -7,8 +7,8 @@ class Main {
         this.boardCanvas = boardCanvas;
         this.networkCanvas = networkCanvas;
         //this.boardCtx = this.boardCanvas.getContext('2d');
-        this.networkCtx = this.networkCanvas.getContext('2d');
-        this.networkCanvas.width = 500;
+        //this.networkCtx = this.networkCanvas.getContext('2d');
+        //this.networkCanvas.width = 500;
         //this.board = new Board(this.boardCtx);
 
         this.#resetStats();
@@ -22,7 +22,7 @@ class Main {
         if (n == 3) return new NetworkEngine();
         
         let depth = Math.round(6 * Math.random());
-        return new MinimaxEngine(4);
+        return new MinimaxEngine(1);
     }
 
     #restart() {
@@ -113,6 +113,7 @@ class Main {
         const msg = document.createElement('p');
         msg.innerText = line;
         this.statsElement.append(msg);
+        window.scrollTo(0, document.body.scrollHeight);
     }
 
     dev() {
@@ -127,11 +128,18 @@ class Main {
             ]];
             NeuralNetworkPrint.printMatrix(trainData[0]);
             const ne = new NetworkEngine();
-            ne.train(trainData, 0.1, 0.1, 30000);
-            NeuralNetworkPrint.printArray(NeuralNetwork.forwardPropagate(ne.nn, [0, 1, 1, 0, 0, -1, -1, -1, 1])); // 0
-            NeuralNetworkPrint.printArray(NeuralNetwork.forwardPropagate(ne.nn, [0, 1, 1, 0, 0, 0, -1, -1, 1]));
+            ne.discard();
+
+            ne.train(trainData);
+            NeuralNetworkPrint.printArray(NeuralNetwork.forwardPropagate(ne.nn, [0, 1, 1, 0, 0, -1, -1, -1, 1]), 'X: 0'); // 0
+            NeuralNetworkPrint.printArray(NeuralNetwork.forwardPropagate(ne.nn, [0, 1, 1, 0, 0,  0, -1, -1, 1]), '0:-5'); // 0
+            NeuralNetworkPrint.printArray(NeuralNetwork.forwardPropagate(ne.nn, [0, 1, 0, 0, 0,  0, -1, -1, 1]), 'X: 2'); // 0
+            NeuralNetworkPrint.printArray(NeuralNetwork.forwardPropagate(ne.nn, [0, 1, 0, 0, 0,  0,  0, -1, 1]), '0:-6'); // 0
+            NeuralNetworkPrint.printArray(NeuralNetwork.forwardPropagate(ne.nn, [0, 0, 0, 0, 0,  0,  0, -1, 1]), 'X: 1'); // 0
+            NeuralNetworkPrint.printArray(NeuralNetwork.forwardPropagate(ne.nn, [0, 0, 0, 0, 0,  0,  0,  0, 1]), '0: 7'); // 0
+            NeuralNetworkPrint.printArray(NeuralNetwork.forwardPropagate(ne.nn, [0, 0, 0, 0, 0,  0,  0,  0, 0]), 'X: 8'); // 0
             console.log(ne)
             return;
-        } while (true);
+        } while (true); 
     }
 }

@@ -22,7 +22,7 @@ class NeuralNetworkTrainSGD {
             }
 
             if (epoch % 10000 == 0) {
-                console.log('Epoch: ' + epoch + '; ' + 'Total Error: ' + (error/trains.length) + '; ');
+                console.log('Epoch: ' + epoch + '; ' + 'Total Error: ' + (error) + '; ');
             }
 
         } while (error > minError && ++epoch < maxEpoch); // 4.508s

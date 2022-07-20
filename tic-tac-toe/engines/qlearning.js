@@ -50,7 +50,7 @@ class QLearningEngine extends GameEngine {
         let rewardB = Math.abs(status) != 0 ? LST : DRW; // prev move lost (if game status = -1 || 1) or draw
         for (let i = game.hist.length - 1, p = true; i >= 0; i--, p = !p) {
             const posIdx = this.#getPositionIndex(fields);
-            const gameValue = this.#getPositionValue(posIdx, 0);
+            const moveValue = this.#getPositionValue(posIdx, 0);
             if (p) { // calculates players X and O separatly
                 this.matrix[posIdx] = rewardA;
                 rewardA = gameValue + K * (rewardA - gameValue);

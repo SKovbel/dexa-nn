@@ -66,10 +66,10 @@ class NeuralNetworkTrainAdam {
             }
             if (epoch % options.rateScale.epochStep == 0) {
                 learnRate *= this.options.rateScale.multiply;
-                console.log('Epoch: ' + epoch + '; ' + 'New Learning rate: ' + learnRate + '; ');
+                //console.log('Epoch: ' + epoch + '; ' + 'New Learning rate: ' + learnRate + '; ');
             }
-            if (epoch % 10000 == 0) {
-                console.log('Epoch: ' + epoch + '; ' + 'Total Error: ' + (error/trains.length) + '; ');
+            if (epoch % 10000 == 0 && epoch) {
+                //console.log('Epoch: ' + epoch + '; ' + 'Total Error: ' + (error) + '; ');
             }
             if (options.mutate && prevError == error) {
                 NeuralNetworkTool.mutate(network, options.mutate);

@@ -7,73 +7,71 @@ class NetworkEngine extends GameEngine {
             this.nn = NeuralNetworkTool.import(loaded);
         } else {
             this.nn = new NeuralNetwork([
-                {size: 9, activation: NeuralNetworkActivation.SIGMOID},
-                {size: 36, activation: NeuralNetworkActivation.SIGMOID},
-                {size: 36, activation: NeuralNetworkActivation.SIGMOID},
+                {size: 9, activation: NeuralNetworkActivation.LRELU},
+                {size: 18, activation: NeuralNetworkActivation.SIGMOID},
                 {size: 9}
             ]);
         }
     }
 
     move(game) {
-        let maxMove = -Infinity;
-        let bestMove = null;
-        const outputs = NeuralNetwork.forwardPropagate(this.nn, [...game.fields]);
-        for (let i = 0; i < outputs.length; i++) {
-            if (outputs[i] > maxMove && game.fields[i] == 0) {
-                bestMove = i;
-                maxMove = outputs[0]
+        let outputs = NeuralNetwork.forwardPropagate(this.nn, [...game.fields]);
+        outputs = this.removeIllegalMoves(game.fields, outputs);
+
+        let bestIdx = null;
+        for (let moveIdx = 0, bestVal = -Infinity; moveIdx < outputs.length; moveIdx++) {
+            if (outputs[moveIdx] > bestVal) {
+                bestIdx = moveIdx;
+                bestVal = outputs[moveIdx];
             }
         }
-        return bestMove;
+        return bestIdx;
     }
 
-    train(data, learnRate = 0.01, minError = 0.1, maxEpoch = 10000) {
-        const K = 0.9
+    train(data, learnRate = 0.01, minError = 0.001, maxEpoch = 10000) {
+        const K = 0.9;
         const WIN = 1;
-        const DRW = 0;
-        const LST = -1;
+        const DRW = 0.7;
+        const LST = 0;
 
         for (let item of data) {
             const policyNN = NeuralNetworkTool.clone(this.nn);
             let [fields, histories] = item;
 
             let status = GameStatus.status(fields);
-
-            let moveIdx = histories[histories.length - 1];
-            let trains = [this.#prepareData([...fields], moveIdx, status)];
-            NeuralNetworkTrain.train(this.nn, NeuralNetworkTrain.ADAM, trains, learnRate, minError, maxEpoch);
-            fields[moveIdx] = 0;
-            trains = [];
-
-            for (let h = histories.length - 2, p = false; h >= 0; h--, p = !p) {
+            let rewardA = Math.abs(status) != 0 ? WIN : DRW; // last move win (if game status = -1 || 1) or draw (if 0). Last move can be as X as O
+            let rewardB = Math.abs(status) != 0 ? LST : DRW; // prev move lost (if game status = -1 || 1) or draw
+    
+            let trains = [];
+            let outputs = new Array(9).fill(0);
+            for (let h = histories.length - 1, playerX = true; h >= 0; h--, playerX = !playerX) {
                 let moveIdx = histories[h];
-                let outputs = NeuralNetwork.forwardPropagate(policyNN, fields);
-                if (p) { // calculates players X and O separatly
-                    let reward = status >= 0 ? Math.max(...outputs) : Math.min(...outputs);
-                    trains.push(this.#prepareData([...fields], moveIdx, reward));
-                    NeuralNetworkTrain.train(this.nn, NeuralNetworkTrain.ADAM, trains, learnRate, minError, maxEpoch);
-                    trains = []
+                let moveValue = outputs[moveIdx];
+
+                outputs = this.removeIllegalMoves(fields, outputs);
+                if (playerX) { // calculates player X and 0 separatly
+                    outputs[moveIdx] = rewardA;
+                    rewardA = moveValue + K * (rewardA - moveValue);
                 } else {
-                    let reward = status < 0 ? Math.max(...outputs) : Math.min(...outputs)
-                    //trains.push(this.#prepareData([...fields], moveIdx, reward));
+                    outputs[moveIdx] = rewardB;
+                    rewardB = moveValue + K * (rewardB - moveValue);
                 }
+
                 fields[moveIdx] = 0;
+                trains.push({'inputs': [...fields], 'outputs': outputs});
+                //NeuralNetworkTrain.train(this.nn, NeuralNetworkTrain.ADAM, trains, learnRate, minError, maxEpoch);
+                //trains = [];
+                outputs = NeuralNetwork.forwardPropagate(policyNN, [...fields]);
             }
+            NeuralNetworkTrain.train(this.nn, NeuralNetworkTrain.ADAM, trains, learnRate, minError, maxEpoch);
             this.save(NeuralNetworkTool.export(this.nn));
         }
     }
 
-    #prepareData(fields, moveIdx, reward) {
-        let outputs = NeuralNetwork.forwardPropagate(this.nn, fields);
-        outputs = [...outputs];
+    removeIllegalMoves (fields, outputs) {
         for (let i = 0; i < fields.length; i++) {
             outputs[i] = (fields[i] == 0) ? outputs[i] : 0;
         }
-        outputs[moveIdx] = reward;
-        return {
-            'inputs': fields,
-            'outputs': outputs
-        };
+        return outputs
     }
 }

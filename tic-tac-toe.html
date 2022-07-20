@@ -22,7 +22,7 @@
     <div id="content">
         <pre id="stats"></pre>
         <!--canvas id="board-canvas"></canvas-->
-        <canvas id="network-canvas"></canvas>
+        <!--canvas id="network-canvas"></canvas-->
     </div>
 
     <script>
@@ -41,7 +41,7 @@
         const main = new Main(
             document.getElementById('stats'),
             document.getElementById('board-canvas'),
-            document.getElementById('network-canvas')
+           null//document.getElementById('network-canvas')
         );
 
         if (getGetParam('test')) {
