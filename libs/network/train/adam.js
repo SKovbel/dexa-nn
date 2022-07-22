@@ -1,15 +1,10 @@
 
 class NeuralNetworkTrainAdam {
-    static options = {
-        rateScale: {
-            epochStep: 10000,
-            multiply: 0.95
-        },
-        mutate: 0.1
+    config = {
     }
 
-    static train(network, trains, learnRate = 0.001, minError = 0.1, maxEpoch = 1000, options = {}) {
-        options = Object.assign(options, this.options);
+    train(network, trains, learnRate = 0.001, minError = 0.1, maxEpoch = 1000, config = {}) {
+        config = Object.assign(config, this.config);
         const layers = network.layers;
 
         let epoch = 0;
@@ -34,12 +29,12 @@ class NeuralNetworkTrainAdam {
             }
         }
 
+        let cost = 0;
         do {
-            prevError = error;
-            error = 0;
+            cost = 0;
             for (let t = 0; t < trains.length; t++) {
-                NeuralNetwork.forwardPropagate(network, trains[t].inputs);
-                error += NeuralNetwork.backPropagate(network, trains[t].outputs);
+                network.forwardPropagate(trains[t].inputs);
+                cost += network.backPropagate(trains[t].outputs) / trains.length;
 
                 for (let l = 0; l < layers.length; l++) {
                     const layer = layers[l];
@@ -64,18 +59,8 @@ class NeuralNetworkTrainAdam {
                     }
                 }
             }
-            if (epoch % options.rateScale.epochStep == 0) {
-                learnRate *= this.options.rateScale.multiply;
-                //console.log('Epoch: ' + epoch + '; ' + 'New Learning rate: ' + learnRate + '; ');
-            }
-            if (epoch % 10000 == 0 && epoch) {
-                //console.log('Epoch: ' + epoch + '; ' + 'Total Error: ' + (error) + '; ');
-            }
-            if (options.mutate && prevError == error) {
-                NeuralNetworkTool.mutate(network, options.mutate);
-            }
-        } while (error > minError && ++epoch < maxEpoch);
+        } while (cost > minError && ++epoch < maxEpoch);
 
-        return {'error': error, 'epoch': epoch};
+        return {'error': cost, 'epoch': epoch};
     }
 }

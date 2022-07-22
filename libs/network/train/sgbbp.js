@@ -1,6 +1,6 @@
 // SGD + Back Propagation inside, +15% speed
 class NeuralNetworkTrainSGDBP {
-    static train(network, trains, learnRate = 0.01, minError = 0.1, maxEpoch = 1000, options = {}) {
+    train(network, trains, learnRate = 0.01, minError = 0.1, maxEpoch = 1000, config = {}) {
         const layers = network.layers;
         const first = layers[0];
         const last = layers[layers.length - 1];
@@ -10,7 +10,7 @@ class NeuralNetworkTrainSGDBP {
         do {
             error  = 0;
             for (let t = 0; t < trains.length; t++) {
-                NeuralNetwork.forwardPropagate(network, trains[t].inputs);
+                network.forwardPropagate(trains[t].inputs);
 
                 let errorLayer = [];
                 let errorLayers = [];

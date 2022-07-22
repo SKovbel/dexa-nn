@@ -3,26 +3,46 @@ class Main {
         this.contentElement = contentElement;
         this.networkCanvas = networkCanvas;
 
-        this.network = new NeuralNetwork([
-            {size: 4, activation: NeuralNetworkActivation.LRELU},
-            {size: 4, activation: NeuralNetworkActivation.RELU},
-            {size: 4, activation: NeuralNetworkActivation.TANH},
-            {size: 4, activation: NeuralNetworkActivation.SIGMOID},
-            {size: 4, activation: NeuralNetworkActivation.SOFTMAX},
-            {size: 3},
-        ]);
+        if (1==1) {
+            this.network = new NeuralNetwork({
+                loss: NeuralNetworkLoss.MSE,
+                train: NeuralNetworkTrain.ADAM,
+                layers: [
+                    //{inputSize: 4, activation: NeuralNetworkActivation.LRELU},
+                    //{inputSize: 4, activation: NeuralNetworkActivation.RELU},
+                    //{inputSize: 4, activation: NeuralNetworkActivation.TANH},
+                    {inputSize: 4, activation: NeuralNetworkActivation.SIGMOID},
+                    {inputSize: 4, activation: NeuralNetworkActivation.SIGMOID},
+                    {inputSize: 3},
+                ]
+            });
+        } else {
+            this.network = new NeuralNetwork({
+                loss: NeuralNetworkLoss.CROSS_ENTROPY,
+                train: NeuralNetworkTrain.SGD,
+                layers: [
+                    //{inputSize: 4, activation: NeuralNetworkActivation.LRELU},
+                    //{inputSize: 4, activation: NeuralNetworkActivation.RELU},
+                    //{inputSize: 4, activation: NeuralNetworkActivation.TANH},
+                    {inputSize: 4, activation: NeuralNetworkActivation.SIGMOID},
+                    {inputSize: 4, activation: NeuralNetworkActivation.SIGMOID},
+                    {inputSize: 3},
+                ]
+            });
+        }
     }
 
     train() {
         var train = simpleData.data.filter(item => item.train == true);
-        NeuralNetworkTrain.train(this.network, NeuralNetworkTrain.ADAM, train, 0.01, 0.1, 10000);
+        this.network.train(train, 0.01, 0.01, 10000);
         //NeuralNetworkTrain.train(this.network, NeuralNetworkTrain.SGD, train, 0.01, 0.1, 10000);
     }
 
     test() {
         const trains = simpleData.data.sort((x, y) => x.train - y.train);
+        let bad = 0;
         for (let t = 0; t < trains.length; t++) {
-            let result = NeuralNetwork.forwardPropagate(this.network, trains[t].inputs);
+            let result = this.network.forwardPropagate(trains[t].inputs);
             let result1 = [];
             let result2 = [];
             for (let i = 0; i < result.length; i++) {
@@ -41,10 +61,16 @@ class Main {
             const msg = document.createElement('p');
             msg.innerText = '(' + (trains[t].train ? 'train' : 'skip!') + ') ' + 
                 'Test   [ ' + ins + '] => [ ' + out + '], Result: [' + String(result2) + '], ';
-            msg.style.color = String(result1) == String(trains[t].outputs) ? 'green' : 'red';
+            msg.style.color = 'green';
+            if (String(result1) == String(trains[t].outputs) ) {
+                msg.style.color = 'red';
+                bad++;
+            }
             this.contentElement.append(msg);
         }
-    }
+        this.contentElement.append('Bad: ' + bad + ' / ' + Math.round(100*(bad/trains.length)) + '%');
+        window.scrollTo(0, document.body.scrollHeight);
+}
 
     animate(time) {
         this.networkCtx = this.networkCanvas.getContext('2d');

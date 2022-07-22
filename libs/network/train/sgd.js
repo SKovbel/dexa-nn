@@ -1,15 +1,15 @@
 
 class NeuralNetworkTrainSGD {
-    static train(network, trains, learnRate = 0.001, minError = 0.1, maxEpoch = 1000, options = {}) {
+    train(network, trains, learnRate = 0.001, minError = 0.1, maxEpoch = 1000, options = {}) {
         const layers = network.layers;
 
+        let cost = 0;
         let epoch = 0;
-        let error = 0;
         do {
-            error = 0;
+            cost = 0;
             for (let t = 0; t < trains.length; t++) {
-                NeuralNetwork.forwardPropagate(network, trains[t].inputs);
-                error +=  NeuralNetwork.backPropagate(network, trains[t].outputs);
+                network.forwardPropagate(trains[t].inputs);
+                cost +=  network.backPropagate(trains[t].outputs) / trains.length;
 
                 for (let l = 0; l < layers.length - 1; l++) {
                     for (let j = 0; j < layers[l].outputSize; j++) {
@@ -21,12 +21,12 @@ class NeuralNetworkTrainSGD {
                 }
             }
 
-            if (epoch % 10000 == 0) {
-                console.log('Epoch: ' + epoch + '; ' + 'Total Error: ' + (error) + '; ');
+            if (epoch % 1000 == 0) {
+                console.log('Epoch: ' + epoch + '; ' + 'Total Error: ' + (cost) + '; ');
             }
 
-        } while (error > minError && ++epoch < maxEpoch); // 4.508s
+        } while (cost > minError && ++epoch < maxEpoch); // 4.508s
 
-        return {'error': error, 'epoch': epoch};
+        return {'error': cost, 'epoch': epoch};
     }
 } 

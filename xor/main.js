@@ -14,14 +14,19 @@ class Main {
         this.contentElement = contentElement;
         this.networkCanvas = networkCanvas;
 
-        this.network = new NeuralNetwork([
-            {size: 3, activation: NeuralNetworkActivation.TANH},
-            //{size: 3, activation: NeuralNetworkActivation.RELU},
-            //{size: 3, activation: NeuralNetworkActivation.SOFTMAX},
-            //{size: 3, activation: NeuralNetworkActivation.SIGMOID},
-            {size: 3, activation: NeuralNetworkActivation.SIGMOID},
-            {size: 1},
-        ]);
+        this.network = new NeuralNetwork({
+            loss: NeuralNetworkLoss.MSE,
+            train: NeuralNetworkTrain.SGD,
+            layers: [
+                {inputSize: 3, activation: NeuralNetworkActivation.SIGMOID},
+                //{inputSize: 3, activation: NeuralNetworkActivation.TANH},
+                //{inputSize: 3, activation: NeuralNetworkActivation.RELU},
+                //{inputSize: 3, activation: NeuralNetworkActivation.SOFTMAX},
+                //{inputSize: 3, activation: NeuralNetworkActivation.SIGMOID},
+                {inputSize: 3, activation: NeuralNetworkActivation.SIGMOID},
+                {inputSize: 1},
+            ]
+        });
     }
 
     train() {
@@ -32,16 +37,12 @@ class Main {
                 newTrains.push(this.trains[i]);
             }
         }
-
-        // train
-        //NeuralNetworkTrain.train(this.network, NeuralNetworkTrain.SGDBP, newTrains, 0.1, 0.001, 1000000);
-        //NeuralNetworkTrain.train(this.network, NeuralNetworkTrain.SGD, newTrains, 0.1, 0.001, 1000000);
-        NeuralNetworkTrain.train(this.network, NeuralNetworkTrain.ADAM, newTrains, 0.001, 0.1, 100000);
+        this.network.train(newTrains, 0.001, 0.15, 1000000);
     }
 
     test() {
         for (let t = 0; t < this.trains.length; t++) {
-            const result = NeuralNetwork.forwardPropagate(this.network, this.trains[t].inputs);
+            const result = this.network.forwardPropagate(this.trains[t].inputs);
             let ins = '';
             for (let i = 0; i < this.trains[t].inputs.length; i++) {
                 ins += this.trains[t].inputs[i] + ' ';

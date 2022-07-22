@@ -1,14 +1,14 @@
 class NeuralNetworkTool {
-    static import(data, mutation = 0) {
+    import(data, mutation = 0) {
         const network = (typeof data === 'string') ? JSON.parse(data) : data;
         for (let l = 0; l < network.layers.length; l++) {
             NeuralNetworkLayer.init(network.layers[l]);
         }
-        NeuralNetworkTool.mutate(network, mutation);
+        this.mutate(network, mutation);
         return network;
     }
 
-    static export(network) {
+    export(network) {
         return JSON.stringify(network, (key, value) => {
             if (['inputs', 'outputs', 'gradients', 'momentM', 'momentV', 'inputSize', 'outputSize'].indexOf(key) >= 0 ) {
                 return;
@@ -17,7 +17,7 @@ class NeuralNetworkTool {
         });
     }
 
-    static clone(network, mutation = 0) {
+    clone(network, mutation = 0) {
         let newLayers = [];
         for (let l = 0; l < network.layers.length; l++) {
             const layer = network.layers[l];
@@ -38,19 +38,19 @@ class NeuralNetworkTool {
         return NeuralNetworkTool.import(newNetwork, mutation);
     }
 
-    static mutate(network, mutation = 0) {
+    mutate(network, mutation = 0) {
         for (let l = 0; mutation != 0 && l < network.layers.length; l++) {
             const layer = network.layers[l];
             for (let j = 0; j < layer.outputSize; j++) {
                 for (let i = 0; i < layer.inputSize; i++) {
-                    layer.weights[i][j] = this.#lerp(layer.weights[i][j], 2*Math.random() - 1, mutation);
+                    layer.weights[i][j] = this.#lerp(layer.weights[i][j], 2 * Math.random() - 1, mutation);
                 }
                 layer.biases[j] = this.#lerp(layer.biases[j], 2 * Math.random() - 1, mutation);
             }
         }
     }
 
-    static #lerp(A, B, t) {
+    #lerp(A, B, t) {
         return A + t*(B - A);
     }
 }
