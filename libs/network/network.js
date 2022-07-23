@@ -2,7 +2,7 @@ class NeuralNetwork {
     config = {
         loss: NeuralNetworkLoss.CROSS_ENTROPY,
         train: NeuralNetworkTrain.SGD,
-        layers: {}
+        layers: []
     }
 
     constructor(networkConfig = {}) {
@@ -18,32 +18,32 @@ class NeuralNetwork {
         }
 
         // aliases
-        this.inputLayer = this.layers[0];
-        this.outputLayer = this.layers[this.layers.length - 1];
+        this.firstLayer = this.layers[0];
+        this.lastLayer = this.layers[this.layers.length - 1];
     }
 
     forwardPropagate(inputs) {
-        this.inputLayer.inputs = inputs;
-        this.inputLayer.activate();
+        this.firstLayer.inputs = inputs;
+        this.firstLayer.activate();
         for (let l = 1; l < this.layers.length; l++) {
             this.layers[l].inputs = this.layers[l - 1].outputs;
             this.layers[l].activate();
         }
-        return this.outputLayer.outputs;
+        return this.lastLayer.outputs;
     }
 
     backPropagate(targets) {
         // output layer
         const loss = this.loss(targets);
         const dloss = this.dloss(targets);
-        this.outputLayer.gradients = this.outputLayer.derivate(this.outputLayer.outputs, dloss);
+        this.lastLayer.gradients = this.lastLayer.derivate(this.lastLayer.outputs, dloss);
 
         /*let error = 0;
-        for (let j = 0; j < this.outputLayer.outputSize; j++) {
-            errors[j] = this.outputLayer.outputs[j] - predicts[j];
+        for (let j = 0; j < this.lastLayer.outputSize; j++) {
+            errors[j] = this.lastLayer.outputs[j] - predicts[j];
             error += errors[j] * errors[j];
         }
-        this.outputLayer.gradients = this.outputLayer.derivate(this.outputLayer.outputs, errors);
+        this.lastLayer.gradients = this.lastLayer.derivate(this.lastLayer.outputs, errors);
           */
 
         // hidden layers
@@ -120,14 +120,14 @@ class NeuralNetworkTrain {
         }
 
         // implement train(...) function into network object
-        network.train = (trains, learnRate = 0.01, minError = 0.1, maxEpoch = 1000) => {
-            this.train(network, trains, learnRate, minError, maxEpoch)
+        network.train = (trains, config) => {
+            this.train(network, trains, config)
         }
     }
 
-    train(network, trains, learnRate, minError, maxEpoch) {
+    train(network, trains, config) {
         const t0 = performance.now();
-        const info = this.processor.train(network, trains, learnRate, minError, maxEpoch);
+        const info = this.processor.train(network, trains, config);
         const t1 = performance.now();
         console.log('Time: ' + (Math.round((t1 - t0), 2) / 1000) + 's; Error=' + (info['error']) + '; Epochs=' + info['epoch']);
         return info['error'];

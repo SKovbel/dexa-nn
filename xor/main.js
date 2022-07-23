@@ -37,7 +37,7 @@ class Main {
                 newTrains.push(this.trains[i]);
             }
         }
-        this.network.train(newTrains, 0.001, 0.15, 1000000);
+        this.network.train(newTrains, {learn_rate: 0.001, min_error: 0.15, max_epoch: 1000000});
     }
 
     test() {

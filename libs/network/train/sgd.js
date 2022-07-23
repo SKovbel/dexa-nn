@@ -1,7 +1,13 @@
 
 class NeuralNetworkTrainSGD {
-    train(network, trains, learnRate = 0.001, minError = 0.1, maxEpoch = 1000, options = {}) {
-        const layers = network.layers;
+    config = {
+        learn_rate: 0.001,
+        min_error: 0.1,
+        max_epoch: 1000,
+    }
+
+    train(network, trains, config = {}) {
+        this.config = Object.assign(config, this.config);
 
         let cost = 0;
         let epoch = 0;
@@ -11,11 +17,12 @@ class NeuralNetworkTrainSGD {
                 network.forwardPropagate(trains[t].inputs);
                 cost +=  network.backPropagate(trains[t].outputs) / trains.length;
 
-                for (let l = 0; l < layers.length - 1; l++) {
-                    for (let j = 0; j < layers[l].outputSize; j++) {
-                        layers[l].biases[j] -= learnRate * layers[l].gradients[j];
-                        for (let i = 0; i < layers[l].inputSize; i++) {
-                            layers[l].weights[i][j] -= learnRate * layers[l].inputs[i] * layers[l].gradients[j];
+                for (let l = 0; l < network.layers.length - 1; l++) {
+                    const layer = network.layers[l]
+                    for (let j = 0; j < layer.outputSize; j++) {
+                        layer.biases[j] -= this.config.learn_rate * layer.gradients[j];
+                        for (let i = 0; i < layer.inputSize; i++) {
+                            layer.weights[i][j] -= this.config.learn_rate * layer.inputs[i] * layer.gradients[j];
                         }
                     }
                 }
@@ -25,7 +32,7 @@ class NeuralNetworkTrainSGD {
                 console.log('Epoch: ' + epoch + '; ' + 'Total Error: ' + (cost) + '; ');
             }
 
-        } while (cost > minError && ++epoch < maxEpoch); // 4.508s
+        } while (cost > this.config.min_error && ++epoch < this.config.max_epoch); // 4.508s
 
         return {'error': cost, 'epoch': epoch};
     }

@@ -33,15 +33,15 @@ class NeuralNetworkLoss {
     // ME ----------------------------------
     me(targets) {
         let loss = 0;
-        for (let j = 0; j < this.outputLayer.outputSize; j++) {
-            loss += this.outputLayer.outputs[j] - targets[j];
+        for (let j = 0; j < this.lastLayer.outputSize; j++) {
+            loss += this.lastLayer.outputs[j] - targets[j];
         }
-        return loss / this.outputLayer.outputSize;
+        return loss / this.lastLayer.outputSize;
     }
 
     dme(targets) {
         let loss = [];
-        for (let j = 0; j < this.outputLayer.outputSize; j++) {
+        for (let j = 0; j < this.lastLayer.outputSize; j++) {
             loss[j] = 1;
         }
         return loss;
@@ -50,16 +50,16 @@ class NeuralNetworkLoss {
     // MAE ----------------------------------
     mae(targets) {
         let loss = 0;
-        for (let j = 0; j < this.outputLayer.outputSize; j++) {
-            const error = this.outputLayer.outputs[j] - targets[j];
+        for (let j = 0; j < this.lastLayer.outputSize; j++) {
+            const error = this.lastLayer.outputs[j] - targets[j];
             loss += error >= 0 ? error : -error; // abs
         }
-        return loss / this.outputLayer.outputSize;
+        return loss / this.lastLayer.outputSize;
     }
     dmae(targets) {
         let loss = [];
-        for (let j = 0; j < this.outputLayer.outputSize; j++) {
-            loss[j] = targets[j] > this.outputLayer.outputs[j] ? 1 : -1;
+        for (let j = 0; j < this.lastLayer.outputSize; j++) {
+            loss[j] = targets[j] > this.lastLayer.outputs[j] ? 1 : -1;
         }
         return loss;
     }
@@ -67,17 +67,17 @@ class NeuralNetworkLoss {
     // MSE ----------------------------------
     mse(targets) {
         let loss = 0;
-        for (let j = 0; j < this.outputLayer.outputSize; j++) {
-            const error = this.outputLayer.outputs[j] - targets[j];
+        for (let j = 0; j < this.lastLayer.outputSize; j++) {
+            const error = this.lastLayer.outputs[j] - targets[j];
             loss += 0.5 * error * error;
         }
-        return loss / this.outputLayer.outputSize;
+        return loss / this.lastLayer.outputSize;
     }
 
     dmse(targets) {
         let loss = [];
-        for (let j = 0; j < this.outputLayer.outputSize; j++) {
-            loss[j] = this.outputLayer.outputs[j] - targets[j];
+        for (let j = 0; j < this.lastLayer.outputSize; j++) {
+            loss[j] = this.lastLayer.outputs[j] - targets[j];
         }
         return loss;
     }
@@ -90,16 +90,16 @@ class NeuralNetworkLoss {
     // CROSS_ENTROPY ----------------------------------
     crossEntropy(targets) {
         let loss = 0;
-        for (let j = 0; j < this.outputLayer.outputSize; j++) {
-            loss += -1 * targets[j] * Math.log(this.outputLayer.outputs[j]);
+        for (let j = 0; j < this.lastLayer.outputSize; j++) {
+            loss += -1 * targets[j] * Math.log(this.lastLayer.outputs[j]);
         }
-        return loss / this.outputLayer.outputSize
+        return loss / this.lastLayer.outputSize
     }
 
     dcrossEntropy(targets) {
         let loss = [];
-        for (let j = 0; j < this.outputLayer.outputSize; j++) {
-            loss[j] = this.outputLayer.outputs[j] - targets[j];
+        for (let j = 0; j < this.lastLayer.outputSize; j++) {
+            loss[j] = this.lastLayer.outputs[j] - targets[j];
         }
         return loss;
     }
