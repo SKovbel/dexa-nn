@@ -356,24 +356,23 @@ class NeuralNetwork {
 }
 ;class NeuralNetworkTool {
     import(data, mutation = 0) {
-        const nnData = (typeof data === 'string') ? JSON.parse(data) : data;
-        const network = new NeuralNetwork(nnData.config, nnData.layers);
+        const network = new NeuralNetwork(data.config, data.layers);
         this.mutate(network, mutation);
         return network;
     }
 
     export(network) {
         let layers = [];
-        for (let l = 0; l < network.layers; l++) {
+        for (let l = 0; l < network.layers.length; l++) {
             layers[l] = {
-                'biases': layers[l].biases,
-                'weights': layers[l].weights
+                'biases': network.layers[l].biases,
+                'weights': network.layers[l].weights
             }
         }
-        return JSON.stringify({
+        return {
             'config': network.config,
             'layers': layers
-        });
+        };
     }
 
     clone(network, mutation = 0) {

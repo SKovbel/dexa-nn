@@ -62,15 +62,15 @@ class Main {
 
     save() {
         console.log('Saved');
-        const jsonData = this.networkTool.export(this.bestCar.network);
-        localStorage.setItem(Main.nnName, jsonData);
+        const data = this.networkTool.export(this.bestCar.network);
+        localStorage.setItem(Main.nnName, JSON.stringify(jsonData));
     }
 
     load() {
         const data = localStorage.getItem(Main.nnName);
         if (data) {
             for (let i = 0; i < this.cars.length; i++) {
-                this.cars[i].network = this.networkTool.import(data, i == 0 ? 0 : this.mutationAmount);
+                this.cars[i].network = this.networkTool.import(JSON.parse(data), i == 0 ? 0 : this.mutationAmount);
             }
         }
     }

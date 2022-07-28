@@ -89,10 +89,12 @@ class Main {
         } else {
             incStats('draw', win.code);
         }
+        console.log(this.stats);
+
     }
 
     #printStats() {
-        let line = "".padStart(10);
+        let line = "".padStart(20);
         let keys2 = {};
         for (const key in this.stats) {
             line += key.padStart(10);

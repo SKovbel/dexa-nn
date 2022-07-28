@@ -13,6 +13,7 @@ class NetworkEngine extends GameEngine {
                 train: NeuralNetworkTrain.SGD,
                 layers: [
                     {inputSize: 9, activation: NeuralNetworkActivation.LRELU},
+                    {inputSize: 18, activation: NeuralNetworkActivation.LRELU},
                     {inputSize: 18, activation: NeuralNetworkActivation.SIGMOID},
                     {inputSize: 9},
                 ]
