@@ -9,23 +9,23 @@ class NeuralNetworkActivation {
         switch (activation) {
             case NeuralNetworkActivation.RELU:
                 layer.activate = this.relu;
-                layer.derivate = this.drelu;
+                layer.dactivate = this.drelu;
                 break;
             case NeuralNetworkActivation.LRELU:
                 layer.activate = this.lrelu;
-                layer.derivate = this.dlrelu;
+                layer.dactivate = this.dlrelu;
                 break;
             case NeuralNetworkActivation.TANH:
                 layer.activate = this.tanh;
-                layer.derivate = this.dtanh;
+                layer.dactivate = this.dtanh;
                 break;
             case NeuralNetworkActivation.SIGMOID:
                 layer.activate = this.sigmoid;
-                layer.derivate = this.dsigmoid;
+                layer.dactivate = this.dsigmoid;
                 break;
             case NeuralNetworkActivation.SOFTMAX:
                 layer.activate = this.softmax;
-                layer.derivate = this.dsoftmax;
+                layer.dactivate = this.dsoftmax;
                 break;
         }
     }

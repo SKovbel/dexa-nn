@@ -74,7 +74,7 @@ class NeuralNetwork {
         // output layer
         const loss = this.loss(targets);
         const dloss = this.dloss(targets);
-        this.lastLayer.gradients = this.lastLayer.derivate(this.lastLayer.outputs, dloss);
+        this.lastLayer.gradients = this.lastLayer.dactivate(this.lastLayer.outputs, dloss);
 
         // hidden layers
         for (let l = this.layers.length - 1; l > 0; l--) {
@@ -85,7 +85,7 @@ class NeuralNetwork {
                     errors[j] += this.layers[l].weights[i][j] * this.layers[l].gradients[j];
                 }
             }
-            this.layers[l-1].gradients = this.layers[l-1].derivate(this.layers[l].inputs, errors);
+            this.layers[l-1].gradients = this.layers[l-1].dactivate(this.layers[l].inputs, errors);
         }
 
         // return total error

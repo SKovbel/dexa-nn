@@ -9,23 +9,23 @@
         switch (activation) {
             case NeuralNetworkActivation.RELU:
                 layer.activate = this.relu;
-                layer.derivate = this.drelu;
+                layer.dactivate = this.drelu;
                 break;
             case NeuralNetworkActivation.LRELU:
                 layer.activate = this.lrelu;
-                layer.derivate = this.dlrelu;
+                layer.dactivate = this.dlrelu;
                 break;
             case NeuralNetworkActivation.TANH:
                 layer.activate = this.tanh;
-                layer.derivate = this.dtanh;
+                layer.dactivate = this.dtanh;
                 break;
             case NeuralNetworkActivation.SIGMOID:
                 layer.activate = this.sigmoid;
-                layer.derivate = this.dsigmoid;
+                layer.dactivate = this.dsigmoid;
                 break;
             case NeuralNetworkActivation.SOFTMAX:
                 layer.activate = this.softmax;
-                layer.derivate = this.dsoftmax;
+                layer.dactivate = this.dsoftmax;
                 break;
         }
     }
@@ -336,7 +336,7 @@ class NeuralNetwork {
         // output layer
         const loss = this.loss(targets);
         const dloss = this.dloss(targets);
-        this.lastLayer.gradients = this.lastLayer.derivate(this.lastLayer.outputs, dloss);
+        this.lastLayer.gradients = this.lastLayer.dactivate(this.lastLayer.outputs, dloss);
 
         // hidden layers
         for (let l = this.layers.length - 1; l > 0; l--) {
@@ -347,7 +347,7 @@ class NeuralNetwork {
                     errors[j] += this.layers[l].weights[i][j] * this.layers[l].gradients[j];
                 }
             }
-            this.layers[l-1].gradients = this.layers[l-1].derivate(this.layers[l].inputs, errors);
+            this.layers[l-1].gradients = this.layers[l-1].dactivate(this.layers[l].inputs, errors);
         }
 
         // return total error
