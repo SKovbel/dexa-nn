@@ -89,8 +89,6 @@ class Main {
         } else {
             incStats('draw', win.code);
         }
-        console.log(this.stats);
-
     }
 
     #printStats() {
