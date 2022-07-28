@@ -1,21 +1,27 @@
 class NetworkEngine extends GameEngine {
     constructor() {
         super();
-        this.code = 'network';
+        this.code = 'network-tic-tac-toe';
+        this.networkTool = new NeuralNetworkTool();
+
         const loaded = this.load(null);
         if (loaded) {
-            this.nn = NeuralNetworkTool.import(loaded);
+            this.network = this.networkTool.import(loaded);
         } else {
-            this.nn = new NeuralNetwork([
-                {size: 9, activation: NeuralNetworkActivation.LRELU},
-                {size: 18, activation: NeuralNetworkActivation.SIGMOID},
-                {size: 9}
-            ]);
+            this.network = new NeuralNetwork({
+                loss: NeuralNetworkLoss.MSE,
+                train: NeuralNetworkTrain.SGD,
+                layers: [
+                    {inputSize: 9, activation: NeuralNetworkActivation.LRELU},
+                    {inputSize: 18, activation: NeuralNetworkActivation.SIGMOID},
+                    {inputSize: 9},
+                ]
+            });
         }
     }
 
     move(game) {
-        let outputs = NeuralNetwork.forwardPropagate(this.nn, [...game.fields]);
+        let outputs = this.network.forwardPropagate([...game.fields]);
         outputs = this.removeIllegalMoves(game.fields, outputs);
 
         let bestIdx = null;
@@ -35,7 +41,7 @@ class NetworkEngine extends GameEngine {
         const LST = 0;
 
         for (let item of data) {
-            const policyNN = NeuralNetworkTool.clone(this.nn);
+            const policyNetwork = this.networkTool.clone(this.network);
             let [fields, histories] = item;
 
             let status = GameStatus.status(fields);
@@ -59,12 +65,12 @@ class NetworkEngine extends GameEngine {
 
                 fields[moveIdx] = 0;
                 trains.push({'inputs': [...fields], 'outputs': outputs});
-                //NeuralNetworkTrain.train(this.nn, NeuralNetworkTrain.ADAM, trains, learnRate, minError, maxEpoch);
+                //this.network.train(trains, {learn_rate: learnRate, min_error: minError, max_epoch: maxEpoch});
                 //trains = [];
-                outputs = NeuralNetwork.forwardPropagate(policyNN, [...fields]);
+                outputs = policyNetwork.forwardPropagate([...fields]);
             }
-            NeuralNetworkTrain.train(this.nn, NeuralNetworkTrain.ADAM, trains, learnRate, minError, maxEpoch);
-            this.save(NeuralNetworkTool.export(this.nn));
+            this.network.train(trains, {learn_rate: learnRate, min_error: minError, max_epoch: maxEpoch});
+            this.save(this.networkTool.export(this.network));
         }
     }
 

@@ -2,7 +2,7 @@
  * https://www.youtube.com/watch?v=Rs_rAxEsAvI
  */
 class Main {
-    static nnName = 'self-car-drive'
+    static nnName = 'network-self-car-drive'
     constructor() {
         this.carStartsY = 0;
         this.mutationAmount = 0.2;

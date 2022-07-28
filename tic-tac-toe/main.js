@@ -102,7 +102,7 @@ class Main {
         }
         line += "\n";
         for (const key2 in keys2) {
-            line += key2.padStart(10);
+            line += key2.padStart(20);
             for (const key in this.stats) {
                 const val = key2 in this.stats[key] ? this.stats[key][key2] : 0;
                 line += ('' + val).padStart(10);
