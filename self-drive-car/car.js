@@ -16,11 +16,13 @@ class Car {
         this.controls = new Controls(controlType);
         if (controlType != "DUMMY") {
             this.sensor = new Sensor(this, this.rayCount);
-            this.nn = new NeuralNetwork([
-                {size: this.rayCount, activation: NeuralNetworkActivation.RELU},
-                {size: 6, activation: NeuralNetworkActivation.RELU},
-                {size: 4}
-            ]);
+            this.network = new NeuralNetwork({
+                layers: [
+                    {inputSize: this.rayCount, activation: NeuralNetworkActivation.RELU},
+                    {inputSize: 6, activation: NeuralNetworkActivation.RELU},
+                    {inputSize: 4},
+                ]
+            });
         }
     }
 
@@ -32,7 +34,7 @@ class Car {
             if (this.sensor) {
                 this.sensor.update(roadBorders, traffics);
                 const offsets = this.sensor.readings.map(s => s == null ? 0 : 1 - s.offset);
-                const outputs = NeuralNetwork.forwardPropagate(this.nn, offsets);
+                const outputs = this.network.forwardPropagate(offsets);
                 if (this.useNN) {
                     this.controls.forward = outputs[0];
                     this.controls.left = outputs[1];
@@ -45,12 +47,12 @@ class Car {
 
     #assessDamage(roadBorders, traffics) {
         for (let i = 0; i < roadBorders.length; i++) {
-            if (polysIntersect(this.polygon, roadBorders[i])) {
+            if (this.#polysIntersect(this.polygon, roadBorders[i])) {
                 return true;
             }
         }
         for (let i = 0; i < traffics.length; i++) {
-            if (polysIntersect(this.polygon, traffics[i].polygon)) {
+            if (this.#polysIntersect(this.polygon, traffics[i].polygon)) {
                 return true;
             }
         }
@@ -127,4 +129,22 @@ class Car {
             this.sensor.draw(ctx);
         }
     }
+
+    #polysIntersect(poly1, poly2) {
+        for (let i = 0; i< poly1.length; i++) {
+            for (let j = 0; j < poly2.length; j++) {
+                const touch = getIntersection(
+                    poly1[i],
+                    poly1[(i+1)%poly1.length],
+                    poly2[j],
+                    poly2[(j+1)%poly2.length]
+                );
+                if (touch) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 }   

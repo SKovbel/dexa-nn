@@ -2,7 +2,7 @@
  * https://www.youtube.com/watch?v=Rs_rAxEsAvI
  */
 class Main {
-    static nnName = 'nn-self-car-drive'
+    static nnName = 'self-car-drive'
     constructor() {
         this.carStartsY = 0;
         this.mutationAmount = 0.2;
@@ -14,6 +14,7 @@ class Main {
         this.maxLength = 15;
         this.minTraficSpeed = 1;
         this.maxTraficSpeed = 3;
+        this.networkTool = new NeuralNetworkTool();
     }
 
     init() {
@@ -61,7 +62,7 @@ class Main {
 
     save() {
         console.log('Saved');
-        const jsonData = NeuralNetworkTool.export(this.bestCar.nn);
+        const jsonData = this.networkTool.export(this.bestCar.network);
         localStorage.setItem(Main.nnName, jsonData);
     }
 
@@ -69,7 +70,7 @@ class Main {
         const data = localStorage.getItem(Main.nnName);
         if (data) {
             for (let i = 0; i < this.cars.length; i++) {
-                this.cars[i].nn = NeuralNetworkTool.import(data, i == 0 ? 0 : this.mutationAmount);
+                this.cars[i].network = this.networkTool.import(data, i == 0 ? 0 : this.mutationAmount);
             }
         }
     }
@@ -116,7 +117,7 @@ class Main {
         this.carCtx.restore();
     
         this.networkCtx.lineDashOffset = time/50;
-        NeuralNetworkVisualizer.drawNetwork(this.networkCtx, this.bestCar.nn, ["🠭", "🠬", "🠮", "🠯"]);
+        NeuralNetworkVisualizer.drawNetwork(this.networkCtx, this.bestCar.network, ["🠭", "🠬", "🠮", "🠯"]);
 
         if (this.iter % 50 == 0) {
             console.log(this.iter + '; ' + cntUsefulCars);

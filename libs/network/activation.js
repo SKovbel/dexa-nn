@@ -5,8 +5,8 @@ class NeuralNetworkActivation {
     static SIGMOID = 'sigmoid';
     static SOFTMAX = 'softmax';
 
-    constructor(layer) {
-        switch (layer.config.activation) {
+    constructor(layer, activation) {
+        switch (activation) {
             case NeuralNetworkActivation.RELU:
                 layer.activate = this.relu;
                 layer.derivate = this.drelu;

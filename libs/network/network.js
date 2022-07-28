@@ -1,20 +1,58 @@
+class NeuralNetworkLayer {
+    biases = [];
+    inputs = [];
+    outputs = [];
+    weights = [];
+
+    defaultConfig = {
+        inputSize: 0,
+        outputSize: 0,
+        activation: NeuralNetworkActivation.SIGMOID
+    };
+
+    constructor(layerConfig = {}, layer = null) {
+        const config = Object.assign(this.defaultConfig, layerConfig);
+        new NeuralNetworkActivation(this, config.activation);
+
+        if (layer) {
+            this.biases = layer.biases;
+            this.weights = layer.weights;
+        } else {
+            for (let j = 0; j < config.outputSize; j++) {
+                this.biases[j] = Math.random() * 2 - 1;
+            }
+            for (let i = 0; i < config.inputSize; i++) {
+                this.weights[i] = new Array();
+                for (let j = 0; j < config.outputSize; j++) {
+                    this.weights[i][j] = Math.random() * 2 - 1;
+                }
+            }
+        }
+
+        // aliases
+        this.inputSize = config.inputSize;
+        this.outputSize = config.outputSize;
+    }
+}
+
 class NeuralNetwork {
-    config = {
+    config = {}
+    layers = [];
+
+    defaultConfig = {
         loss: NeuralNetworkLoss.CROSS_ENTROPY,
         train: NeuralNetworkTrain.SGD,
         layers: []
-    }
+    };
 
-    constructor(networkConfig = {}) {
-        this.config = Object.assign(this.config, networkConfig);
-        new NeuralNetworkLoss(this);
-        new NeuralNetworkTrain(this);
+    constructor(networkConfig = {}, layers = null) {
+        this.config = Object.assign(this.defaultConfig, networkConfig);
+        new NeuralNetworkLoss(this, this.config.loss);
+        new NeuralNetworkTrain(this, this.config.train);
 
-        this.layers = [];
         for (let l = 0; l < this.config.layers.length - 1; l++) {
-            let layerConfig = this.config.layers[l];
-            layerConfig.outputSize = this.config.layers[l + 1].inputSize;
-            this.layers.push(new NeuralNetworkLayer(layerConfig));
+            this.config.layers[l].outputSize = this.config.layers[l + 1].inputSize;
+            this.layers.push(new NeuralNetworkLayer(this.config.layers[l], layers ? layers[l] : null));
         }
 
         // aliases
@@ -38,16 +76,7 @@ class NeuralNetwork {
         const dloss = this.dloss(targets);
         this.lastLayer.gradients = this.lastLayer.derivate(this.lastLayer.outputs, dloss);
 
-        /*let error = 0;
-        for (let j = 0; j < this.lastLayer.outputSize; j++) {
-            errors[j] = this.lastLayer.outputs[j] - predicts[j];
-            error += errors[j] * errors[j];
-        }
-        this.lastLayer.gradients = this.lastLayer.derivate(this.lastLayer.outputs, errors);
-          */
-
         // hidden layers
-        let errors = [];
         for (let l = this.layers.length - 1; l > 0; l--) {
             let errors = [];
             for (let i = 0; i < this.layers[l].inputSize; i++) {
@@ -61,75 +90,5 @@ class NeuralNetwork {
 
         // return total error
         return loss;
-    }
-}
-
-
-class NeuralNetworkLayer {
-    config = {
-        inputSize: 0,
-        outputSize: 0,
-        activation: NeuralNetworkActivation.SIGMOID
-    }
-
-    constructor(layerConfig = {}) {
-        this.config = Object.assign(this.config, layerConfig);
-        new NeuralNetworkActivation(this);
-
-        this.biases = new Array(this.config.outputSize);
-        this.weights = new Array(this.config.inputSize);
-        this.inputs = new Array(this.config.inputSize);
-        this.outputs = new Array(this.config.outputSize);
-        for (let i = 0; i < layerConfig.inputSize; i++) {
-            this.weights[i] = new Array(layerConfig.outputSize);
-        }
-
-        // aliases
-        this.inputSize = this.config.inputSize;
-        this.outputSize = this.config.outputSize;
-
-        this.randomize();
-    }
-     
-    randomize() {
-        for (let j = 0; j < this.outputSize; j++) {
-            this.biases[j] = Math.random() * 2 - 1;
-            for (let i = 0; i < this.inputSize; i++) {
-                this.weights[i][j] = Math.random() * 2 - 1;
-            }
-        }
-    }
-}
-
-class NeuralNetworkTrain {
-    static SGD = 'sgd';
-    static SGDBP = 'sgdbp';
-    static ADAM = 'adam';
-
-    constructor(network) {
-        switch (network.config.train) {
-            case NeuralNetworkTrain.SGD:
-                this.processor = new NeuralNetworkTrainSGD()
-                break;
-            case NeuralNetworkTrain.SGDBP:
-                this.processor = new NeuralNetworkTrainSGDBP()
-                break;
-            case NeuralNetworkTrain.ADAM:
-                this.processor = new NeuralNetworkTrainAdam()
-                break;
-        }
-
-        // implement train(...) function into network object
-        network.train = (trains, config) => {
-            this.train(network, trains, config)
-        }
-    }
-
-    train(network, trains, config) {
-        const t0 = performance.now();
-        const info = this.processor.train(network, trains, config);
-        const t1 = performance.now();
-        console.log('Time: ' + (Math.round((t1 - t0), 2) / 1000) + 's; Error=' + (info['error']) + '; Epochs=' + info['epoch']);
-        return info['error'];
     }
 }

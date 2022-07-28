@@ -1,19 +1,23 @@
 class NeuralNetworkTool {
     import(data, mutation = 0) {
-        const network = (typeof data === 'string') ? JSON.parse(data) : data;
-        for (let l = 0; l < network.layers.length; l++) {
-            NeuralNetworkLayer.init(network.layers[l]);
-        }
+        const nnData = (typeof data === 'string') ? JSON.parse(data) : data;
+        const network = new NeuralNetwork(nnData.config, nnData.layers);
+        console.log(network);
         this.mutate(network, mutation);
         return network;
     }
 
     export(network) {
-        return JSON.stringify(network, (key, value) => {
-            if (['inputs', 'outputs', 'gradients', 'momentM', 'momentV', 'inputSize', 'outputSize'].indexOf(key) >= 0 ) {
-                return;
+        let layers = [];
+        for (let l = 0; l < network.layers; l++) {
+            layers[l] = {
+                biases: layers[l].biases,
+                weights: layers[l].weights
             }
-            return value;
+        }
+        return JSON.stringify({
+            config: network.config,
+            layers: layers
         });
     }
 

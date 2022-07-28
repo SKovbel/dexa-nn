@@ -6,8 +6,8 @@ class NeuralNetworkLoss {
     static RMSE = 'rmse';
     static CROSS_ENTROPY = 'cross_entropy';
 
-    constructor(network) {
-        switch (network.config.loss) {
+    constructor(network, loss) {
+        switch (loss) {
             case NeuralNetworkLoss.ME:
                 network.loss = this.me;
                 network.dloss = this.dme;
