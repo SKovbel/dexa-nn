@@ -1,5 +1,5 @@
 // SGD + Back Propagation inside, +15% speed
-class NeuralNetworkTrainSGDBP {
+class NeuralNetworkTrainSGDOrg {
     config = {
         learn_rate: 0.001,
         min_error: 0.1,

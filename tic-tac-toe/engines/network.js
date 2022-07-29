@@ -10,7 +10,7 @@ class NetworkEngine extends GameEngine {
         } else {
             this.network = new NeuralNetwork({
                 loss: NeuralNetworkLoss.MSE,
-                train: NeuralNetworkTrain.SGD,
+                train: NeuralNetworkTrain.SGDORG,
                 layers: [
                     {inputSize: 9, activation: NeuralNetworkActivation.SIGMOID},
                     {inputSize: 18, activation: NeuralNetworkActivation.SIGMOID},
@@ -35,7 +35,7 @@ class NetworkEngine extends GameEngine {
         return bestIdx;
     }
 
-    train(data, learnRate = 0.01, minError = 0.001, maxEpoch = 10000) {
+    train(data, learnRate = 0.1, minError = 0.1, maxEpoch = 10000) {
         const K = 0.9;
         const WIN = 1;
         const DRW = 0.7;

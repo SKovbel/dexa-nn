@@ -1,6 +1,6 @@
 class NeuralNetworkTrain {
     static SGD = 'sgd';
-    static SGDBP = 'sgdbp';
+    static SGDORG = 'sgd_original';
     static ADAM = 'adam';
 
     constructor(network, train) {
@@ -8,8 +8,8 @@ class NeuralNetworkTrain {
             case NeuralNetworkTrain.SGD:
                 this.processor = new NeuralNetworkTrainSGD()
                 break;
-            case NeuralNetworkTrain.SGDBP:
-                this.processor = new NeuralNetworkTrainSGDBP()
+            case NeuralNetworkTrain.SGDORG:
+                this.processor = new NeuralNetworkTrainSGDOrg()
                 break;
             case NeuralNetworkTrain.ADAM:
                 this.processor = new NeuralNetworkTrainAdam()

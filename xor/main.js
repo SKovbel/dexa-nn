@@ -16,7 +16,7 @@ class Main {
 
         this.network = new NeuralNetwork({
             loss: NeuralNetworkLoss.MAE,
-            train: NeuralNetworkTrain.SGDBP,
+            train: NeuralNetworkTrain.SGDORG,
             layers: [
                 //{inputSize: 3, activation: NeuralNetworkActivation.TANH},
                 //{inputSize: 3, activation: NeuralNetworkActivation.RELU},

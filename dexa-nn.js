@@ -414,7 +414,7 @@ class NeuralNetwork {
 }
 ;;class NeuralNetworkTrain {
     static SGD = 'sgd';
-    static SGDBP = 'sgdbp';
+    static SGDORG = 'sgd_original';
     static ADAM = 'adam';
 
     constructor(network, train) {
@@ -422,8 +422,8 @@ class NeuralNetwork {
             case NeuralNetworkTrain.SGD:
                 this.processor = new NeuralNetworkTrainSGD()
                 break;
-            case NeuralNetworkTrain.SGDBP:
-                this.processor = new NeuralNetworkTrainSGDBP()
+            case NeuralNetworkTrain.SGDORG:
+                this.processor = new NeuralNetworkTrainSGDOrg()
                 break;
             case NeuralNetworkTrain.ADAM:
                 this.processor = new NeuralNetworkTrainAdam()
@@ -548,7 +548,7 @@ class NeuralNetworkTrainSGD {
     }
 } 
 ;// SGD + Back Propagation inside, +15% speed
-class NeuralNetworkTrainSGDBP {
+class NeuralNetworkTrainSGDOrg {
     config = {
         learn_rate: 0.001,
         min_error: 0.1,
