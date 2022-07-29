@@ -9,12 +9,12 @@ class NeuralNetworkTool {
         let layers = [];
         for (let l = 0; l < network.layers.length; l++) {
             layers[l] = {
-                'biases': network.layers[l].biases,
-                'weights': network.layers[l].weights
+                'biases': [...network.layers[l].biases],
+                'weights': [...network.layers[l].weights]
             }
         }
         return {
-            'config': network.config,
+            'config': Object.assign({}, network.config),
             'layers': layers
         };
     }

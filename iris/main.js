@@ -3,39 +3,23 @@ class Main {
         this.contentElement = contentElement;
         this.networkCanvas = networkCanvas;
 
-        if (1==1) {
-            this.network = new NeuralNetwork({
-                loss: NeuralNetworkLoss.MSE,
-                train: NeuralNetworkTrain.ADAM,
-                layers: [
-                    //{inputSize: 4, activation: NeuralNetworkActivation.LRELU},
-                    //{inputSize: 4, activation: NeuralNetworkActivation.RELU},
-                    //{inputSize: 4, activation: NeuralNetworkActivation.TANH},
-                    {inputSize: 4, activation: NeuralNetworkActivation.SIGMOID},
-                    {inputSize: 4, activation: NeuralNetworkActivation.SIGMOID},
-                    {inputSize: 3},
-                ]
-            });
-        } else {
-            this.network = new NeuralNetwork({
-                loss: NeuralNetworkLoss.CROSS_ENTROPY,
-                train: NeuralNetworkTrain.SGD,
-                layers: [
-                    //{inputSize: 4, activation: NeuralNetworkActivation.LRELU},
-                    //{inputSize: 4, activation: NeuralNetworkActivation.RELU},
-                    //{inputSize: 4, activation: NeuralNetworkActivation.TANH},
-                    {inputSize: 4, activation: NeuralNetworkActivation.SIGMOID},
-                    {inputSize: 4, activation: NeuralNetworkActivation.SIGMOID},
-                    {inputSize: 3},
-                ]
-            });
-        }
+        this.network = new NeuralNetwork({
+            loss: NeuralNetworkLoss.CROSS_ENTROPY,
+            train: NeuralNetworkTrain.SGD,
+            layers: [
+                {inputSize: 4, activation: NeuralNetworkActivation.LRELU},
+                {inputSize: 4, activation: NeuralNetworkActivation.RELU},
+                {inputSize: 4, activation: NeuralNetworkActivation.TANH},
+                {inputSize: 4, activation: NeuralNetworkActivation.SIGMOID},
+                {inputSize: 4, activation: NeuralNetworkActivation.SOFTMAX},
+                {inputSize: 3},
+            ]
+        });
     }
 
     train() {
         var train = simpleData.data.filter(item => item.train == true);
-        this.network.train(train, 0.01, 0.01, 10000);
-        //NeuralNetworkTrain.train(this.network, NeuralNetworkTrain.SGD, train, 0.01, 0.1, 10000);
+        this.network.train(train, {learn_rate: 0.01, min_error: 0.01, max_epoch: 10000});
     }
 
     test() {

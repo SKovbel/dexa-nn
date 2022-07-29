@@ -10,7 +10,7 @@ class NeuralNetworkTrainAdam {
     }
 
     train(network, trains, config = {}) {
-        this.config = Object.assign(config, this.config);
+        this.config = Object.assign(this.config, config);
 
         for (let l = 0; l < network.layers.length; l++) {
             const layer = network.layers[l];

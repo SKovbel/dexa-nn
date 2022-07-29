@@ -1,4 +1,5 @@
 class NeuralNetworkLayer {
+    config = {};
     biases = [];
     inputs = [];
     outputs = [];
@@ -11,27 +12,27 @@ class NeuralNetworkLayer {
     };
 
     constructor(layerConfig = {}, layer = null) {
-        const config = Object.assign(this.defaultConfig, layerConfig);
-        new NeuralNetworkActivation(this, config.activation);
+        this.config = Object.assign(this.defaultConfig, layerConfig);
+        new NeuralNetworkActivation(this, this.config.activation);
 
         if (layer) {
             this.biases = layer.biases;
             this.weights = layer.weights;
         } else {
-            for (let j = 0; j < config.outputSize; j++) {
+            for (let j = 0; j < this.config.outputSize; j++) {
                 this.biases[j] = Math.random() * 2 - 1;
             }
-            for (let i = 0; i < config.inputSize; i++) {
+            for (let i = 0; i < this.config.inputSize; i++) {
                 this.weights[i] = new Array();
-                for (let j = 0; j < config.outputSize; j++) {
+                for (let j = 0; j < this.config.outputSize; j++) {
                     this.weights[i][j] = Math.random() * 2 - 1;
                 }
             }
         }
 
         // aliases
-        this.inputSize = config.inputSize;
-        this.outputSize = config.outputSize;
+        this.inputSize = this.config.inputSize;
+        this.outputSize = this.config.outputSize;
     }
 }
 
@@ -72,7 +73,6 @@ class NeuralNetwork {
 
     backPropagate(targets) {
         // output layer
-        const loss = this.loss(targets);
         const dloss = this.dloss(targets);
         this.lastLayer.gradients = this.lastLayer.dactivate(this.lastLayer.outputs, dloss);
 
@@ -82,13 +82,12 @@ class NeuralNetwork {
             for (let i = 0; i < this.layers[l].inputSize; i++) {
                 errors[i] = 0;
                 for (let j = 0; j < this.layers[l].outputSize; j++) {
-                    errors[j] += this.layers[l].weights[i][j] * this.layers[l].gradients[j];
+                    errors[i] += this.layers[l].weights[i][j] * this.layers[l].gradients[j];
                 }
             }
             this.layers[l-1].gradients = this.layers[l-1].dactivate(this.layers[l].inputs, errors);
         }
-
-        // return total error
-        return loss;
+        // return loss error
+        return this.loss(targets);
     }
 }

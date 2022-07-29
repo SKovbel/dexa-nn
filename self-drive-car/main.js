@@ -63,7 +63,7 @@ class Main {
     save() {
         console.log('Saved');
         const data = this.networkTool.export(this.bestCar.network);
-        localStorage.setItem(Main.nnName, JSON.stringify(jsonData));
+        localStorage.setItem(Main.nnName, JSON.stringify(data));
     }
 
     load() {

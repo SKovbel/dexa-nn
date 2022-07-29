@@ -7,7 +7,7 @@ class NeuralNetworkTrainSGD {
     }
 
     train(network, trains, config = {}) {
-        this.config = Object.assign(config, this.config);
+        this.config = Object.assign(this.config, config);
 
         let cost = 0;
         let epoch = 0;

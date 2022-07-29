@@ -17,9 +17,9 @@ module.exports = function(grunt){
             },
             dist: {
                 src: [
-                    ["./libs/**"],
+                    ["./network/**"],
                 ],
-                dest: "./dexa.js"
+                dest: "./dexa-nn.js"
             }
         },
         /*uglify: {

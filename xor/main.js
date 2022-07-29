@@ -15,14 +15,14 @@ class Main {
         this.networkCanvas = networkCanvas;
 
         this.network = new NeuralNetwork({
-            loss: NeuralNetworkLoss.MSE,
-            train: NeuralNetworkTrain.SGD,
+            loss: NeuralNetworkLoss.CROSS_ENTROPY,
+            train: NeuralNetworkTrain.ADAM,
             layers: [
-                {inputSize: 3, activation: NeuralNetworkActivation.SIGMOID},
                 //{inputSize: 3, activation: NeuralNetworkActivation.TANH},
                 //{inputSize: 3, activation: NeuralNetworkActivation.RELU},
                 //{inputSize: 3, activation: NeuralNetworkActivation.SOFTMAX},
-                //{inputSize: 3, activation: NeuralNetworkActivation.SIGMOID},
+                //{inputSize: 3, activation: NeuralNetworkActivation.LRELU},
+                {inputSize: 3, activation: NeuralNetworkActivation.SIGMOID},
                 {inputSize: 3, activation: NeuralNetworkActivation.SIGMOID},
                 {inputSize: 1},
             ]
@@ -37,7 +37,7 @@ class Main {
                 newTrains.push(this.trains[i]);
             }
         }
-        this.network.train(newTrains, {learn_rate: 0.001, min_error: 0.15, max_epoch: 1000000});
+        this.network.train(newTrains, {learn_rate: 0.01, min_error: 0.00001, max_epoch: 100000000});
     }
 
     test() {

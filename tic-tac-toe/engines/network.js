@@ -12,8 +12,8 @@ class NetworkEngine extends GameEngine {
                 loss: NeuralNetworkLoss.MSE,
                 train: NeuralNetworkTrain.SGD,
                 layers: [
-                    {inputSize: 9, activation: NeuralNetworkActivation.LRELU},
-                    {inputSize: 18, activation: NeuralNetworkActivation.LRELU},
+                    {inputSize: 9, activation: NeuralNetworkActivation.SIGMOID},
+                    {inputSize: 18, activation: NeuralNetworkActivation.SIGMOID},
                     {inputSize: 18, activation: NeuralNetworkActivation.SIGMOID},
                     {inputSize: 9},
                 ]
@@ -51,7 +51,7 @@ class NetworkEngine extends GameEngine {
     
             let trains = [];
             let outputs = new Array(9).fill(0);
-            for (let h = histories.length - 1, playerX = true; h >= 0; h--, playerX = !playerX) {
+            for (let h = histories.length - 1, playerX = true; h > 0; h--, playerX = !playerX) {
                 let moveIdx = histories[h];
                 let moveValue = outputs[moveIdx];
 
