@@ -1,11 +1,11 @@
 class Main {
     trains = [
         {inputs: [0,0,0], outputs: [0], train: true},
-        {inputs: [0,0,1], outputs: [1], train: false},
+        {inputs: [0,0,1], outputs: [1], train: true},
         {inputs: [0,1,0], outputs: [1], train: true},
         {inputs: [0,1,1], outputs: [0], train: true},
         {inputs: [1,0,0], outputs: [1], train: true},
-        {inputs: [1,0,1], outputs: [0], train: false},
+        {inputs: [1,0,1], outputs: [0], train: true},
         {inputs: [1,1,0], outputs: [0], train: true},
         {inputs: [1,1,1], outputs: [1], train: true},
     ];
@@ -15,15 +15,16 @@ class Main {
         this.networkCanvas = networkCanvas;
 
         this.network = new NeuralNetwork({
-            loss: NeuralNetworkLoss.CROSS_ENTROPY,
-            train: NeuralNetworkTrain.ADAM,
+            loss: NeuralNetworkLoss.MAE,
+            train: NeuralNetworkTrain.SGDBP,
             layers: [
                 //{inputSize: 3, activation: NeuralNetworkActivation.TANH},
                 //{inputSize: 3, activation: NeuralNetworkActivation.RELU},
                 //{inputSize: 3, activation: NeuralNetworkActivation.SOFTMAX},
                 //{inputSize: 3, activation: NeuralNetworkActivation.LRELU},
+                //{inputSize: 3, activation: NeuralNetworkActivation.SIGMOID},
                 {inputSize: 3, activation: NeuralNetworkActivation.SIGMOID},
-                {inputSize: 3, activation: NeuralNetworkActivation.SIGMOID},
+                {inputSize: 6, activation: NeuralNetworkActivation.SIGMOID},
                 {inputSize: 1},
             ]
         });
@@ -37,7 +38,7 @@ class Main {
                 newTrains.push(this.trains[i]);
             }
         }
-        this.network.train(newTrains, {learn_rate: 0.01, min_error: 0.00001, max_epoch: 100000000});
+        this.network.train(newTrains, {learn_rate: 0.1, min_error: 0.01, max_epoch: 10000});
     }
 
     test() {
