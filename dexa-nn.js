@@ -27,6 +27,7 @@
                 layer.activate = this.softmax;
                 layer.dactivate = this.dsoftmax;
                 break;
+            default:
         }
     }
 
@@ -166,22 +167,18 @@ class NeuralNetworkLoss {
         switch (loss) {
             case NeuralNetworkLoss.ME:
                 network.loss = this.me;
-                network.dloss = this.dme;
                 break;
             case NeuralNetworkLoss.MAE:
                 network.loss = this.mae;
-                network.dloss = this.dmae;
                 break;
             case NeuralNetworkLoss.MSE:
                 network.loss = this.mse;
-                network.dloss = this.dmse; // deriviate
                 break;
             case NeuralNetworkLoss.RMSE:
                 network.loss = this.rmse;
                 break;
             case NeuralNetworkLoss.CROSS_ENTROPY:
                 network.loss = this.crossEntropy;
-                network.dloss = this.dcrossEntropy;
                 break;
         }
     }
@@ -189,75 +186,65 @@ class NeuralNetworkLoss {
     // ME ----------------------------------
     me(targets) {
         let loss = 0;
+        let errors = [];
         for (let j = 0; j < this.lastLayer.outputSize; j++) {
             loss += this.lastLayer.outputs[j] - targets[j];
+            errors[j] = this.lastLayer.outputs[j] - targets[j];
         }
-        return loss / this.lastLayer.outputSize;
-    }
-
-    dme(targets) {
-        let loss = [];
-        for (let j = 0; j < this.lastLayer.outputSize; j++) {
-            loss[j] = 1;
+        return {
+            'loss': loss / this.lastLayer.outputSize,
+            'errors': errors
         }
-        return loss;
     }
 
     // MAE ----------------------------------
     mae(targets) {
         let loss = 0;
+        let errors = [];
         for (let j = 0; j < this.lastLayer.outputSize; j++) {
+            errors[j] = this.lastLayer.outputs[j] - targets[j];
             const error = this.lastLayer.outputs[j] - targets[j];
             loss += error >= 0 ? error : -error; // abs
         }
-        return loss / this.lastLayer.outputSize;
-    }
-    dmae(targets) {
-        let loss = [];
-        for (let j = 0; j < this.lastLayer.outputSize; j++) {
-            loss[j] = targets[j] > this.lastLayer.outputs[j] ? 1 : -1;
+        return {
+            'loss': loss / this.lastLayer.outputSize,
+            'errors': errors
         }
-        return loss;
     }
 
     // MSE ----------------------------------
     mse(targets) {
         let loss = 0;
+        let errors = [];
         for (let j = 0; j < this.lastLayer.outputSize; j++) {
-            const error = this.lastLayer.outputs[j] - targets[j];
-            loss += 0.5 * error * error;
+            errors[j] = this.lastLayer.outputs[j] - targets[j];
+            loss += 0.5 * errors[j] * errors[j];
         }
-        return loss / this.lastLayer.outputSize;
-    }
-
-    dmse(targets) {
-        let loss = [];
-        for (let j = 0; j < this.lastLayer.outputSize; j++) {
-            loss[j] = this.lastLayer.outputs[j] - targets[j];
+        return {
+            'loss': loss / this.lastLayer.outputSize,
+            'errors': errors
         }
-        return loss;
     }
 
     // RMSE ----------------------------------
     rmse(targets) {
-        return Math.sqrt(this.mse(targets));
+        let result = this.mse(targets);
+        result.loss = Math.sqrt(this.mse(result.loss));
+        return result;
     }
 
     // CROSS_ENTROPY ----------------------------------
     crossEntropy(targets) {
         let loss = 0;
+        let errors = [];
         for (let j = 0; j < this.lastLayer.outputSize; j++) {
+            errors[j] = this.lastLayer.outputs[j] - targets[j];
             loss += -1 * targets[j] * Math.log(this.lastLayer.outputs[j]);
         }
-        return loss / this.lastLayer.outputSize
-    }
-
-    dcrossEntropy(targets) {
-        let loss = [];
-        for (let j = 0; j < this.lastLayer.outputSize; j++) {
-            loss[j] = this.lastLayer.outputs[j] - targets[j];
+        return {
+            'loss': loss / this.lastLayer.outputSize,
+            'errors': errors
         }
-        return loss;
     }
 }
 ;class NeuralNetworkLayer {
@@ -335,8 +322,8 @@ class NeuralNetwork {
 
     backPropagate(targets) {
         // output layer
-        const dloss = this.dloss(targets);
-        this.lastLayer.gradients = this.lastLayer.dactivate(this.lastLayer.outputs, dloss);
+        let {loss, errors} = this.loss(targets);
+        this.lastLayer.gradients = this.lastLayer.dactivate(this.lastLayer.outputs, errors);
 
         // hidden layers
         for (let l = this.layers.length - 1; l > 0; l--) {
@@ -349,8 +336,7 @@ class NeuralNetwork {
             }
             this.layers[l-1].gradients = this.layers[l-1].dactivate(this.layers[l].inputs, errors);
         }
-        // return loss error
-        return this.loss(targets);
+        return loss;
     }
 }
 ;class NeuralNetworkTool {
@@ -420,19 +406,19 @@ class NeuralNetwork {
     constructor(network, train) {
         switch (train) {
             case NeuralNetworkTrain.SGD:
-                this.processor = new NeuralNetworkTrainSGD()
+                this.processor = new NeuralNetworkTrainSGD();
                 break;
             case NeuralNetworkTrain.SGDORG:
-                this.processor = new NeuralNetworkTrainSGDOrg()
+                this.processor = new NeuralNetworkTrainSGDOrg();
                 break;
             case NeuralNetworkTrain.ADAM:
-                this.processor = new NeuralNetworkTrainAdam()
+                this.processor = new NeuralNetworkTrainAdam();
                 break;
         }
 
         // implement train(...) function into network object
         network.train = (trains, config) => {
-            this.train(network, trains, config)
+            this.train(network, trains, config);
         }
     }
 
@@ -508,45 +494,6 @@ class NeuralNetworkTrainAdam {
         return {'error': cost, 'epoch': epoch};
     }
 }
-;
-class NeuralNetworkTrainSGD {
-    config = {
-        learn_rate: 0.001,
-        min_error: 0.1,
-        max_epoch: 1000,
-    }
-
-    train(network, trains, config = {}) {
-        this.config = Object.assign(this.config, config);
-
-        let cost = 0;
-        let epoch = 0;
-        do {
-            cost = 0;
-            for (let t = 0; t < trains.length; t++) {
-                network.forwardPropagate(trains[t].inputs);
-                cost +=  network.backPropagate(trains[t].outputs) / trains.length;
-
-                for (let l = 0; l < network.layers.length - 1; l++) {
-                    const layer = network.layers[l]
-                    for (let j = 0; j < layer.outputSize; j++) {
-                        layer.biases[j] -= this.config.learn_rate * layer.gradients[j];
-                        for (let i = 0; i < layer.inputSize; i++) {
-                            layer.weights[i][j] -= this.config.learn_rate * layer.inputs[i] * layer.gradients[j];
-                        }
-                    }
-                }
-            }
-
-            if (epoch % 1000 == 0) {
-                console.log('Epoch: ' + epoch + '; ' + 'Total Error: ' + (cost) + '; ');
-            }
-
-        } while (cost > this.config.min_error && ++epoch < this.config.max_epoch); // 4.508s
-
-        return {'error': cost, 'epoch': epoch};
-    }
-} 
 ;// SGD + Back Propagation inside, +15% speed
 class NeuralNetworkTrainSGDOrg {
     config = {
@@ -609,6 +556,45 @@ class NeuralNetworkTrainSGDOrg {
         return {'error': cost, 'epoch': epoch};
     }
 }
+;
+class NeuralNetworkTrainSGD {
+    config = {
+        learn_rate: 0.001,
+        min_error: 0.1,
+        max_epoch: 1000,
+    }
+
+    train(network, trains, config = {}) {
+        this.config = Object.assign(this.config, config);
+
+        let cost = 0;
+        let epoch = 0;
+        do {
+            cost = 0;
+            for (let t = 0; t < trains.length; t++) {
+                network.forwardPropagate(trains[t].inputs);
+                cost +=  network.backPropagate(trains[t].outputs) / trains.length;
+
+                for (let l = 0; l < network.layers.length - 1; l++) {
+                    const layer = network.layers[l]
+                    for (let j = 0; j < layer.outputSize; j++) {
+                        layer.biases[j] -= this.config.learn_rate * layer.gradients[j];
+                        for (let i = 0; i < layer.inputSize; i++) {
+                            layer.weights[i][j] -= this.config.learn_rate * layer.inputs[i] * layer.gradients[j];
+                        }
+                    }
+                }
+            }
+
+            if (epoch % 1000 == 0) {
+                console.log('Epoch: ' + epoch + '; ' + 'Total Error: ' + (cost) + '; ');
+            }
+
+        } while (cost > this.config.min_error && ++epoch < this.config.max_epoch); // 4.508s
+
+        return {'error': cost, 'epoch': epoch};
+    }
+} 
 ;class NeuralNetworkPrint {
     static printNetwork(network) {
         console.log('#Network');

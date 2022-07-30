@@ -6,19 +6,19 @@ class NeuralNetworkTrain {
     constructor(network, train) {
         switch (train) {
             case NeuralNetworkTrain.SGD:
-                this.processor = new NeuralNetworkTrainSGD()
+                this.processor = new NeuralNetworkTrainSGD();
                 break;
             case NeuralNetworkTrain.SGDORG:
-                this.processor = new NeuralNetworkTrainSGDOrg()
+                this.processor = new NeuralNetworkTrainSGDOrg();
                 break;
             case NeuralNetworkTrain.ADAM:
-                this.processor = new NeuralNetworkTrainAdam()
+                this.processor = new NeuralNetworkTrainAdam();
                 break;
         }
 
         // implement train(...) function into network object
         network.train = (trains, config) => {
-            this.train(network, trains, config)
+            this.train(network, trains, config);
         }
     }
 

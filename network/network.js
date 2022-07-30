@@ -73,8 +73,8 @@ class NeuralNetwork {
 
     backPropagate(targets) {
         // output layer
-        const dloss = this.dloss(targets);
-        this.lastLayer.gradients = this.lastLayer.dactivate(this.lastLayer.outputs, dloss);
+        let {loss, errors} = this.loss(targets);
+        this.lastLayer.gradients = this.lastLayer.dactivate(this.lastLayer.outputs, errors);
 
         // hidden layers
         for (let l = this.layers.length - 1; l > 0; l--) {
@@ -87,7 +87,6 @@ class NeuralNetwork {
             }
             this.layers[l-1].gradients = this.layers[l-1].dactivate(this.layers[l].inputs, errors);
         }
-        // return loss error
-        return this.loss(targets);
+        return loss;
     }
 }

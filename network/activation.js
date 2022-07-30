@@ -27,6 +27,7 @@ class NeuralNetworkActivation {
                 layer.activate = this.softmax;
                 layer.dactivate = this.dsoftmax;
                 break;
+            default:
         }
     }
 

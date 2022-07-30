@@ -15,8 +15,8 @@ class Main {
         this.networkCanvas = networkCanvas;
 
         this.network = new NeuralNetwork({
-            loss: NeuralNetworkLoss.MAE,
-            train: NeuralNetworkTrain.SGDORG,
+            loss: NeuralNetworkLoss.MSE,
+            train: NeuralNetworkTrain.ADAM,
             layers: [
                 //{inputSize: 3, activation: NeuralNetworkActivation.TANH},
                 //{inputSize: 3, activation: NeuralNetworkActivation.RELU},

@@ -10,7 +10,7 @@ class NetworkEngine extends GameEngine {
         } else {
             this.network = new NeuralNetwork({
                 loss: NeuralNetworkLoss.MSE,
-                train: NeuralNetworkTrain.SGDORG,
+                train: NeuralNetworkTrain.SGD,
                 layers: [
                     {inputSize: 9, activation: NeuralNetworkActivation.SIGMOID},
                     {inputSize: 18, activation: NeuralNetworkActivation.SIGMOID},
